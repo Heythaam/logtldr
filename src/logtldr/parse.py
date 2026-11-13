@@ -47,10 +47,11 @@ _TS_KEYS = ("timestamp", "time", "ts", "@timestamp")
 def parse(raw_lines: list[RawLogLine]) -> list[LogLine]:
     """Parse a batch of raw lines into LogLine objects.
 
-    JSON-hinted lines are parsed as JSON, everything else as plaintext.
-    Missing fields fall back to sensible defaults (level defaults to "INFO",
-    timestamp defaults to None). Malformed JSON falls back to plaintext parse;
-    no lines are dropped.
+    Dispatch by ``raw.format``:
+
+    - ``"json"`` → :func:`_parse_json`
+    - ``"plaintext"`` → :func:`_parse_plaintext`
+    - anything else (pytest, docker, npm, custom, unknown) → :func:`_parse_fallback`
 
     Example:
         >>> from logtldr.models import RawLogLine
@@ -62,9 +63,38 @@ def parse(raw_lines: list[RawLogLine]) -> list[LogLine]:
     for idx, raw in enumerate(raw_lines, start=1):
         if raw.format == "json":
             result.append(_parse_json(idx, raw))
-        else:
+        elif raw.format == "plaintext":
             result.append(_parse_plaintext(idx, raw))
+        else:
+            result.append(_parse_fallback(idx, raw))
     return result
+
+
+def _parse_fallback(line_id: int, raw: RawLogLine) -> LogLine:
+    """Fallback parser for formats without a dedicated parser yet.
+
+    No field extraction: message is the full raw line, timestamp is None,
+    level defaults to "INFO" (not detected — Rule Engine won't match this
+    against WARN/ERROR/FATAL). Covers pytest, docker, npm (until those
+    parsers land) and any custom/unknown format.
+
+    Example:
+        >>> from logtldr.models import RawLogLine
+        >>> lines = parse([RawLogLine(format="custom", raw_text="anything")])
+        >>> lines[0].message
+        'anything'
+        >>> lines[0].timestamp is None
+        True
+    """
+    return LogLine(
+        line_id=line_id,
+        original_text=raw.raw_text,
+        redacted_text=raw.raw_text,
+        timestamp=None,
+        level=_DEFAULT_LEVEL,
+        message=raw.raw_text,
+        source_format=raw.format,
+    )
 
 
 def _parse_json(line_id: int, raw: RawLogLine) -> LogLine:
