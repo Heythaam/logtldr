@@ -2,9 +2,9 @@
 
 import argparse
 import sys
-from pathlib import Path
 from typing import NoReturn, Optional
 
+from logtldr.ingest import ingest
 from logtldr.models import FinalSummary
 
 
@@ -56,17 +56,6 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _read_input(source: Optional[str]) -> Optional[str]:
-    """Return the log text, or None if the source cannot be read."""
-    if source is None or source == "-":
-        return sys.stdin.read()
-    try:
-        return Path(source).read_text(encoding="utf-8")
-    except OSError as exc:
-        print(f"logtldr: cannot read {source}: {exc}", file=sys.stderr)
-        return None
-
-
 def main(argv: Optional[list[str]] = None) -> int:
     """CLI entry point. Returns the process exit code."""
     parser = _build_parser()
@@ -77,19 +66,24 @@ def main(argv: Optional[list[str]] = None) -> int:
         parser.print_help(sys.stderr)
         return 1
 
-    raw = _read_input(args.source)
-    if raw is None:
+    try:
+        raw_lines = ingest(args.source)
+    except OSError as exc:
+        where = args.source if args.source is not None else "<stdin>"
+        print(f"logtldr: cannot read {where}: {exc}", file=sys.stderr)
         return 1
-    if not raw.strip():
+
+    if not raw_lines:
         print("logtldr: no input on stdin or file", file=sys.stderr)
         return 1
 
-    # Downstream pipeline is not wired yet; report what we saw so the CLI
-    # is exercisable end-to-end.
-    line_count = len(raw.splitlines())
+    detected_format = raw_lines[0].format
     summary = FinalSummary(
         status="ok",
-        verdict=f"read {line_count} log line(s) (pipeline not yet wired)",
+        verdict=(
+            f"read {len(raw_lines)} log line(s), format '{detected_format}' "
+            f"(pipeline not yet wired)"
+        ),
     )
     if args.as_json:
         print(summary.model_dump_json())

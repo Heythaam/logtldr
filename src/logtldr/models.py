@@ -214,3 +214,20 @@ class FinalSummary(BaseModel):
         default_factory=list, description="Rule-based unknowns"
     )
     check_next: Optional[str] = None
+
+class RawLogLine(BaseModel):
+    """A single raw log line before any parsing.
+
+    Format is detected at the batch level by the ingest stage; every line
+    in a batch carries the same hint.
+
+    Example:
+        >>> RawLogLine(format="plaintext", raw_text="INFO ok").format
+        'plaintext'
+    """
+
+    format: str = Field(
+        ...,
+        description="Format hint: 'plaintext', 'json', 'pytest', 'docker', 'npm'",
+    )
+    raw_text: str = Field(..., description="Verbatim line as read from the source")
