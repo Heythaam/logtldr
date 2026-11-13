@@ -6,14 +6,11 @@ from typing import NoReturn, Optional
 
 from logtldr.ingest import ingest
 from logtldr.models import FinalSummary
+from logtldr.parse import parse
 
 
 class _Parser(argparse.ArgumentParser):
-    """ArgumentParser that exits with status 1 on argument errors.
-
-    The stock ArgumentParser exits 2 on unknown flags. The CLI contract for
-    logtldr is "exit 1 on any error", so we override here.
-    """
+    """ArgumentParser that exits with status 1 on argument errors."""
 
     def error(self, message: str) -> NoReturn:
         self.print_usage(sys.stderr)
@@ -61,7 +58,6 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
-    # No file argument and no piped input — show help instead of blocking.
     if args.source is None and sys.stdin.isatty():
         parser.print_help(sys.stderr)
         return 1
@@ -77,12 +73,19 @@ def main(argv: Optional[list[str]] = None) -> int:
         print("logtldr: no input on stdin or file", file=sys.stderr)
         return 1
 
+    log_lines = parse(raw_lines)
+    level_counts: dict[str, int] = {}
+    for ln in log_lines:
+        level_counts[ln.level] = level_counts.get(ln.level, 0) + 1
+    levels_str = ", ".join(f"{k}:{v}" for k, v in sorted(level_counts.items()))
+
     detected_format = raw_lines[0].format
     summary = FinalSummary(
         status="ok",
         verdict=(
-            f"read {len(raw_lines)} log line(s), format '{detected_format}' "
-            f"(pipeline not yet wired)"
+            f"read {len(raw_lines)} log line(s), format '{detected_format}', "
+            f"parsed {len(log_lines)} (levels: {levels_str}); "
+            f"pipeline not yet wired"
         ),
     )
     if args.as_json:
