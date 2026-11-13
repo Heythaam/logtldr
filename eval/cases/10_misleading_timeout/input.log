@@ -1,0 +1,13 @@
+2024-01-15T10:00:05Z INFO request started path=/api/checkout
+2024-01-15T10:00:05Z INFO request started path=/api/search
+2024-01-15T10:00:06Z INFO request started path=/api/user
+2024-01-15T10:00:15Z WARN upstream timeout calling db-primary:5432 (10s)
+2024-01-15T10:00:16Z ERROR request failed path=/api/checkout status=504 reason=upstream_timeout
+2024-01-15T10:00:16Z WARN upstream timeout calling db-primary:5432 (10s)
+2024-01-15T10:00:17Z ERROR request failed path=/api/search status=504 reason=upstream_timeout
+2024-01-15T10:00:18Z INFO request started path=/api/user
+2024-01-15T10:00:28Z WARN upstream timeout calling db-primary:5432 (10s)
+2024-01-15T10:00:29Z ERROR request failed path=/api/user status=504 reason=upstream_timeout
+2024-01-15T10:00:35Z INFO upstream recovered: db-primary:5432
+2024-01-15T10:00:36Z INFO request started path=/api/checkout
+2024-01-15T10:00:36Z INFO request completed path=/api/checkout status=200

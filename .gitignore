@@ -225,3 +225,7 @@ __marimo__/
 ARCHITECTURE.md
 PRD.md
 SPRINT_PLAN.md
+
+
+# Allow eval case logs
+!eval/cases/**/*.log
