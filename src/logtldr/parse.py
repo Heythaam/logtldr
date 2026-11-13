@@ -45,47 +45,25 @@ _TS_KEYS = ("timestamp", "time", "ts", "@timestamp")
 
 
 def parse(raw_lines: list[RawLogLine]) -> list[LogLine]:
-    """Parse a batch of raw lines into LogLine objects.
-
-    Dispatch by ``raw.format``:
-
-    - ``"json"`` → :func:`_parse_json`
-    - ``"plaintext"`` → :func:`_parse_plaintext`
-    - anything else (pytest, docker, npm, custom, unknown) → :func:`_parse_fallback`
-
-    Example:
-        >>> from logtldr.models import RawLogLine
-        >>> raws = [RawLogLine(format="json", raw_text='{"message": "hi", "level": "INFO"}')]
-        >>> [ln.message for ln in parse(raws)]
-        ['hi']
-    """
+    """Parse a batch of raw lines into LogLine objects."""
     result: list[LogLine] = []
     for idx, raw in enumerate(raw_lines, start=1):
         if raw.format == "json":
             result.append(_parse_json(idx, raw))
         elif raw.format == "plaintext":
             result.append(_parse_plaintext(idx, raw))
+        elif raw.format == "pytest":
+            result.append(_parse_pytest(idx, raw))
+        elif raw.format == "docker":
+            result.append(_parse_docker(idx, raw))
+        elif raw.format == "npm":
+            result.append(_parse_npm(idx, raw))
         else:
             result.append(_parse_fallback(idx, raw))
     return result
 
 
 def _parse_fallback(line_id: int, raw: RawLogLine) -> LogLine:
-    """Fallback parser for formats without a dedicated parser yet.
-
-    No field extraction: message is the full raw line, timestamp is None,
-    level defaults to "INFO" (not detected — Rule Engine won't match this
-    against WARN/ERROR/FATAL). Covers pytest, docker, npm (until those
-    parsers land) and any custom/unknown format.
-
-    Example:
-        >>> from logtldr.models import RawLogLine
-        >>> lines = parse([RawLogLine(format="custom", raw_text="anything")])
-        >>> lines[0].message
-        'anything'
-        >>> lines[0].timestamp is None
-        True
-    """
     return LogLine(
         line_id=line_id,
         original_text=raw.raw_text,
@@ -142,7 +120,6 @@ def _parse_plaintext(line_id: int, raw: RawLogLine) -> LogLine:
     if lm:
         level = _normalize_level(lm.group("level"))
         prefix = rest[: lm.start()].strip()
-        # Only strip the level if it's at the start (possibly wrapped in [ ]).
         if prefix in ("", "["):
             end = lm.end()
             if end < len(rest) and rest[end] == "]":
@@ -157,6 +134,74 @@ def _parse_plaintext(line_id: int, raw: RawLogLine) -> LogLine:
         level=level,
         message=rest.strip() or text,
         source_format="plaintext",
+    )
+
+
+def _parse_pytest(line_id: int, raw: RawLogLine) -> LogLine:
+    text = raw.raw_text
+    level = _DEFAULT_LEVEL
+    if "FAILED" in text or "ERROR" in text or "AssertionError" in text or "E   " in text:
+        level = "ERROR"
+    elif "PASSED" in text:
+        level = "INFO"
+    
+    m = _ISO8601_RE.match(text)
+    timestamp = _parse_timestamp_str(m.group("ts")) if m else None
+    
+    return LogLine(
+        line_id=line_id,
+        original_text=text,
+        redacted_text=text,
+        timestamp=timestamp,
+        level=level,
+        message=text,
+        source_format="pytest",
+    )
+
+
+def _parse_docker(line_id: int, raw: RawLogLine) -> LogLine:
+    text = raw.raw_text
+    level = _DEFAULT_LEVEL
+    if "ERROR" in text or "Killed" in text or "failed" in text.lower() or "exit code: 137" in text:
+        level = "ERROR"
+    elif "WARN" in text:
+        level = "WARN"
+    
+    m = _ISO8601_RE.match(text)
+    timestamp = _parse_timestamp_str(m.group("ts")) if m else None
+    
+    return LogLine(
+        line_id=line_id,
+        original_text=text,
+        redacted_text=text,
+        timestamp=timestamp,
+        level=level,
+        message=text,
+        source_format="docker",
+    )
+
+
+def _parse_npm(line_id: int, raw: RawLogLine) -> LogLine:
+    text = raw.raw_text
+    level = _DEFAULT_LEVEL
+    if "npm ERR!" in text or "FAIL" in text or "Error" in text:
+        level = "ERROR"
+    elif "npm WARN" in text or "WARN" in text:
+        level = "WARN"
+    elif "PASS" in text:
+        level = "INFO"
+    
+    m = _ISO8601_RE.match(text)
+    timestamp = _parse_timestamp_str(m.group("ts")) if m else None
+    
+    return LogLine(
+        line_id=line_id,
+        original_text=text,
+        redacted_text=text,
+        timestamp=timestamp,
+        level=level,
+        message=text,
+        source_format="npm",
     )
 
 
@@ -197,7 +242,6 @@ def _parse_timestamp_str(s: str) -> Optional[datetime]:
     s = s.strip()
     if not s:
         return None
-    # fromisoformat in py3.10 doesn't accept "Z"; py3.11+ does. Normalize.
     if s.endswith("Z"):
         s = s[:-1] + "+00:00"
     s = _trim_fraction(s)
@@ -205,10 +249,8 @@ def _parse_timestamp_str(s: str) -> Optional[datetime]:
         return datetime.fromisoformat(s)
     except ValueError:
         pass
+    
     normalized = re.sub(r"\s+", " ", s)
-    # Syslog without a year: "Mon DD HH:MM:SS". Inject the current year
-    # explicitly — relying on strptime's default (1900) triggers a
-    # DeprecationWarning in py3.13 and changes behavior in py3.15.
     m = re.match(r"^([A-Z][a-z]{2}) (\d{1,2}) (\d{2}:\d{2}:\d{2})$", normalized)
     if m:
         try:
@@ -218,6 +260,7 @@ def _parse_timestamp_str(s: str) -> Optional[datetime]:
             )
         except ValueError:
             pass
+            
     for fmt in (
         "%b %d %Y %H:%M:%S",
         "%Y-%m-%d %H:%M:%S",
@@ -232,7 +275,6 @@ def _parse_timestamp_str(s: str) -> Optional[datetime]:
 
 
 def _trim_fraction(s: str) -> str:
-    """fromisoformat accepts at most 6 fractional digits; truncate the rest."""
     m = re.match(r"^([^.]+\.\d{6})\d+(.*)$", s)
     if m:
         return m.group(1) + m.group(2)

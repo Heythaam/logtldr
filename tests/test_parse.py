@@ -188,3 +188,53 @@ def test_fallback() -> None:
         assert line.timestamp is None  # no timestamp extraction
         assert line.level == "INFO"  # default, not extracted
         assert line.source_format == raw.format
+
+
+# ---------- format-specific tests (LT-06) ----------
+
+def test_pytest_format() -> None:
+    """Pytest output extracts PASSED as INFO, FAILED/AssertionError as ERROR."""
+    raws = [
+        RawLogLine(format="pytest", raw_text="tests/test_math.py::test_add PASSED"),
+        RawLogLine(format="pytest", raw_text="tests/test_math.py::test_multiply FAILED"),
+        RawLogLine(format="pytest", raw_text="AssertionError: assert 11 == 12"),
+    ]
+    lines = parse(raws)
+    
+    assert len(lines) == 3
+    assert lines[0].level == "INFO"
+    assert lines[1].level == "ERROR"
+    assert lines[2].level == "ERROR"
+    assert lines[1].source_format == "pytest"
+
+
+def test_docker_format() -> None:
+    """Docker output extracts Killed/ERROR/failed as ERROR."""
+    raws = [
+        RawLogLine(format="docker", raw_text="Step 1/12 : FROM python:3.11-slim"),
+        RawLogLine(format="docker", raw_text="Killed"),
+        RawLogLine(format="docker", raw_text="ERROR: failed to solve: executor failed running"),
+    ]
+    lines = parse(raws)
+    
+    assert len(lines) == 3
+    assert lines[0].level == "INFO"
+    assert lines[1].level == "ERROR"
+    assert lines[2].level == "ERROR"
+    assert lines[1].source_format == "docker"
+
+
+def test_npm_format() -> None:
+    """npm output extracts ERR! as ERROR and WARN as WARN."""
+    raws = [
+        RawLogLine(format="npm", raw_text="> myapp@1.0.0 install /workspace"),
+        RawLogLine(format="npm", raw_text="npm ERR! code ERESOLVE"),
+        RawLogLine(format="npm", raw_text="npm WARN deprecated foo@1.0.0"),
+    ]
+    lines = parse(raws)
+    
+    assert len(lines) == 3
+    assert lines[0].level == "INFO"
+    assert lines[1].level == "ERROR"
+    assert lines[2].level == "WARN"
+    assert lines[1].source_format == "npm"

@@ -21,6 +21,8 @@ _PYTEST_MARKERS = (
 
 _NPM_MARKERS = ("npm ERR!", "npm WARN", "npm info", "node_modules/", "> ")
 
+_DOCKER_BUILD_MARKERS = ("Step ", " ---> ", "Successfully built", "Successfully tagged")
+
 
 def ingest(source: Optional[str] = None) -> list[RawLogLine]:
     """Read log lines from a file (``source``) or stdin (``None`` or ``"-"``).
@@ -47,30 +49,29 @@ def ingest(source: Optional[str] = None) -> list[RawLogLine]:
 
 
 def detect_format(lines: list[str]) -> str:
-    """Return a format hint: ``json``, ``plaintext``, ``pytest``, ``docker``, or ``npm``.
-
-    Heuristic, not authoritative — later stages may refine on a per-line basis.
-    The first matching rule wins, in order: json → pytest → npm → docker →
-    plaintext (fallback).
-
-    Example:
-        >>> detect_format(['{"a": 1}', '{"b": 2}'])
-        'json'
-        >>> detect_format(["INFO ok", "INFO done"])
-        'plaintext'
-    """
+    """Return a format hint: json, plaintext, pytest, docker, or npm."""
     non_empty = [ln for ln in lines if ln.strip()]
     if not non_empty:
         return "plaintext"
+        
     if _mostly_json(non_empty):
         return "json"
+        
     head = non_empty[:50]
+    
     if any(any(m in ln for m in _PYTEST_MARKERS) for ln in head):
         return "pytest"
+        
     if any(any(m in ln for m in _NPM_MARKERS) for ln in head):
         return "npm"
+        
+    # This is the new check for Docker build output
+    if any(any(m in ln for m in _DOCKER_BUILD_MARKERS) for ln in head):
+        return "docker"
+        
     if _DOCKER_TS.match(non_empty[0]):
         return "docker"
+        
     return "plaintext"
 
 
