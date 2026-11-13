@@ -5,6 +5,8 @@ import io
 import pytest
 
 from logtldr.ingest import detect_format, ingest
+from logtldr.models import RawLogLine  # noqa: E402
+from logtldr.parse import parse  # noqa: E402
 
 
 def test_ingest_stdin(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -67,3 +69,96 @@ def test_ingest_detect_format_json_vs_plaintext() -> None:
     assert detect_format(['{"a": 1}', '{"b": 2}']) == "json"
     assert detect_format(["INFO ok", "INFO done"]) == "plaintext"
     assert detect_format([]) == "plaintext"
+
+
+# ---------- parse tests (LT-05) ----------
+
+def test_json_lines() -> None:
+    """JSON lines extract level, message, timestamp; missing fields default."""
+    raws = [
+        RawLogLine(
+            format="json",
+            raw_text='{"timestamp": "2024-01-15T10:23:45Z", "level": "INFO", "message": "service started"}',
+        ),
+        RawLogLine(
+            format="json",
+            raw_text='{"ts": 1705316625, "severity": "ERROR", "msg": "boom"}',
+        ),
+        RawLogLine(format="json", raw_text='{"message": "only message"}'),
+    ]
+    lines = parse(raws)
+
+    assert len(lines) == 3
+    assert lines[0].line_id == 1
+    assert lines[0].level == "INFO"
+    assert lines[0].message == "service started"
+    assert lines[0].timestamp is not None
+    assert lines[0].timestamp.year == 2024
+    assert lines[0].source_format == "json"
+
+    assert lines[1].level == "ERROR"
+    assert lines[1].message == "boom"
+    assert lines[1].timestamp is not None
+
+    # Missing level → default INFO; missing timestamp → None
+    assert lines[2].level == "INFO"
+    assert lines[2].message == "only message"
+    assert lines[2].timestamp is None
+
+
+def test_plaintext_with_timestamps() -> None:
+    """ISO8601 and syslog prefixes are extracted; level and message split."""
+    raws = [
+        RawLogLine(
+            format="plaintext", raw_text="2024-01-15T10:23:45Z INFO service started"
+        ),
+        RawLogLine(
+            format="plaintext", raw_text="2024-01-15 10:23:45 WARN something odd"
+        ),
+        RawLogLine(
+            format="plaintext",
+            raw_text="Jan  1 12:34:56 host app[1234]: ERROR failed",
+        ),
+        RawLogLine(format="plaintext", raw_text="no timestamp here"),
+    ]
+    lines = parse(raws)
+
+    assert len(lines) == 4
+    assert lines[0].level == "INFO"
+    assert lines[0].message == "service started"
+    assert lines[0].timestamp is not None
+    assert lines[0].timestamp.year == 2024
+
+    assert lines[1].level == "WARN"
+    assert lines[1].message == "something odd"
+    assert lines[1].timestamp is not None
+
+    assert lines[2].level == "ERROR"
+    assert lines[2].message == "failed"
+    assert lines[2].timestamp is not None
+
+    # No timestamp, no level → both defaults (None / INFO)
+    assert lines[3].level == "INFO"
+    assert lines[3].timestamp is None
+    assert lines[3].message == "no timestamp here"
+
+
+def test_parse_missing_fields() -> None:
+    """Missing keys don't raise; defaults applied per AD-2."""
+    raws = [
+        RawLogLine(format="json", raw_text='{"level": "ERROR"}'),
+        RawLogLine(format="json", raw_text="this is not json"),
+        RawLogLine(format="json", raw_text='{"lvl": "warning", "msg": "odd"}'),
+    ]
+    lines = parse(raws)
+
+    # JSON with only level: message falls back to raw_text
+    assert lines[0].level == "ERROR"
+    assert lines[0].message == '{"level": "ERROR"}'
+
+    # Malformed JSON: falls back to plaintext parse, not dropped
+    assert lines[1].source_format == "plaintext"
+
+    # Alternative keys: lvl → level, msg → message
+    assert lines[2].level == "WARN"
+    assert lines[2].message == "odd"
