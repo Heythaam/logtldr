@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+
+# Local planning docs (README stays tracked)
+ARCHITECTURE.md
+PRD.md
+SPRINT_PLAN.md
