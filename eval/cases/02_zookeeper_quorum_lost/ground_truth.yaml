@@ -1,0 +1,7 @@
+status: "ok"
+cause: "Zookeeper peer lost quorum during leader election"
+cause_keywords: ["no quorum", "quorum lost", "Notification time out"]
+cause_type: "temporal"
+evidence_line_ids: [1, 571, 641]
+expected_unknowns:
+  - "only one peer's logs present; other peers may have distinct failures"

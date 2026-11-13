@@ -1,0 +1,7 @@
+status: "ok"
+cause: "CI runner ran out of disk space writing to npm cache"
+cause_keywords: ["ENOSPC", "no space left on device"]
+cause_type: "direct"
+evidence_line_ids: [7, 8, 9]
+expected_unknowns:
+  - "which disk filled (root vs cache mount) cannot be determined from these logs alone"

@@ -1,0 +1,7 @@
+status: "ok"
+cause: "Repeated SSH authentication failures from single source"
+cause_keywords: ["Failed password", "authentication failures", "Invalid user"]
+cause_type: "direct"
+evidence_line_ids: [6, 29, 30, 31, 32]
+expected_unknowns:
+  - "brute-force attack vs misconfigured client cannot be distinguished from auth logs alone"
