@@ -162,3 +162,29 @@ def test_parse_missing_fields() -> None:
     # Alternative keys: lvl → level, msg → message
     assert lines[2].level == "WARN"
     assert lines[2].message == "odd"
+
+def test_fallback() -> None:
+    """Unknown formats → LogLine with message = raw text, no extraction.
+
+    Covers: literal unknown format, custom vendor format, and formats the
+    ingest stage detects but the parser doesn't yet support (pytest).
+    """
+    raws = [
+        RawLogLine(
+            format="unknown",
+            raw_text="2024-01-15T10:23:45Z INFO this looks parseable but is not",
+        ),
+        RawLogLine(format="custom_vendor", raw_text='{"would": "parse as json"}'),
+        RawLogLine(format="pytest", raw_text="tests/test_x.py::a PASSED"),
+    ]
+    lines = parse(raws)
+
+    assert len(lines) == 3
+    for i, (line, raw) in enumerate(zip(lines, raws), start=1):
+        assert line.line_id == i
+        assert line.original_text == raw.raw_text
+        assert line.redacted_text == raw.raw_text
+        assert line.message == raw.raw_text  # message is the full line
+        assert line.timestamp is None  # no timestamp extraction
+        assert line.level == "INFO"  # default, not extracted
+        assert line.source_format == raw.format
