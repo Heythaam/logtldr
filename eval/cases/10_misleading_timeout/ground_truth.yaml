@@ -1,0 +1,9 @@
+status: "ok"
+cause: "Transient connection timeouts to db-primary; upstream recovered"
+cause_keywords: ["upstream timeout", "db-primary", "504"]
+cause_type: "temporal"
+evidence_line_ids: [4, 5, 6, 7, 9, 10, 11]
+expected_unknowns:
+  - "db-primary's own logs not present; why it timed out (load, network, slow query) is outside this window"
+  - "logs cover only ~30 seconds; sustained outage would be indistinguishable from this transient blip"
+  - "errors point to an external dependency; check db-primary logs separately"

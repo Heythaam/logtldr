@@ -1,0 +1,6 @@
+status: "ok"
+cause: "npm peer dependency conflict: react@18 required, react-dom@17 requires react@17"
+cause_keywords: ["ERESOLVE", "peer", "react-dom", "dependency conflict"]
+cause_type: "direct"
+evidence_line_ids: [4, 12, 13]
+expected_unknowns: []

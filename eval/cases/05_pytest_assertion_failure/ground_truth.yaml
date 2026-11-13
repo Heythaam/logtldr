@@ -1,0 +1,6 @@
+status: "ok"
+cause: "Unit test test_multiply failed: multiply(3, 4) returned 11 instead of 12"
+cause_keywords: ["AssertionError", "test_multiply", "FAILED"]
+cause_type: "direct"
+evidence_line_ids: [8, 14, 15, 19]
+expected_unknowns: []

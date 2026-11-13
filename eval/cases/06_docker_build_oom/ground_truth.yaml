@@ -1,0 +1,7 @@
+status: "ok"
+cause: "Docker build OOM-killed while pip-installing large packages (torch, numpy)"
+cause_keywords: ["Killed", "exit code: 137", "out of memory"]
+cause_type: "direct"
+evidence_line_ids: [10, 11]
+expected_unknowns:
+  - "exit 137 indicates SIGKILL (often OOM) but exact cause depends on host cgroup limits"

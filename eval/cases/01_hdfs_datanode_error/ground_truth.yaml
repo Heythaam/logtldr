@@ -1,0 +1,7 @@
+status: "ok"
+cause: "DataNode repeatedly resets peer connections during block writes"
+cause_keywords: ["Connection reset", "IOException", "writeBlock", "Got exception"]
+cause_type: "direct"
+evidence_line_ids: [78, 79, 81, 89]
+expected_unknowns:
+  - "only one DataNode's logs present; peer failure could be network or peer-side"

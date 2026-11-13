@@ -1,0 +1,13 @@
+Step 1/12 : FROM python:3.11-slim
+ ---> 3a4f2e1b8c9d
+Step 2/12 : WORKDIR /app
+ ---> Running in 1b2c3d4e5f6a
+ ---> 7a8b9c0d1e2f
+Step 5/12 : RUN pip install -r requirements.txt
+ ---> Running in 9f8e7d6c5b4a
+Collecting torch==2.0.0
+  Downloading torch-2.0.0-cp311-cp311-manylinux1_x86_64.whl (619.9 MB)
+Collecting numpy==1.24.0
+  Downloading numpy-1.24.0-cp311-cp311-manylinux1_x86_64.whl (17.3 MB)
+Killed
+ERROR: failed to solve: executor failed running [/bin/sh -c pip install -r requirements.txt]: exit code: 137
