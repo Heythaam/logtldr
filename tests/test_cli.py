@@ -61,7 +61,8 @@ def test_cli_reads_stdin(
     rc = main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "read 2 log line(s)" in out
+    # Updated for LT-45: It now outputs the stub LLM response
+    assert "Stub LLM response" in out
 
 
 def test_cli_json_mode(
