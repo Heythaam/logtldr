@@ -229,3 +229,6 @@ SPRINT_PLAN.md
 
 # Allow eval case logs
 !eval/cases/**/*.log
+
+# Eval diagnostic outputs
+eval/results/

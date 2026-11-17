@@ -1,27 +1,23 @@
 """Log ingestion: read from stdin or file, detect format hints."""
 
 import json
-import re
 import sys
 from pathlib import Path
 from typing import Optional
 
 from logtldr.models import RawLogLine
 
-_DOCKER_TS = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z? ")
-
-_PYTEST_MARKERS = (
-    "test session starts",
-    "=== FAILURES ===",
-    "collected ",
-    "PASSED ",
-    "FAILED ",
-    "ERROR ",
+# Made these highly specific to avoid false positives
+_PYTEST_MARKERS = ("test session starts", "=== FAILURES ===", "collected ")
+_NPM_MARKERS = ("npm ERR!", "npm WARN", "node_modules/")
+_DOCKER_BUILD_MARKERS = (
+    "Step 1/", 
+    "Step 2/", 
+    "Step 3/", 
+    " ---> Running in", 
+    " ---> Using cache", 
+    "Successfully built"
 )
-
-_NPM_MARKERS = ("npm ERR!", "npm WARN", "npm info", "node_modules/", "> ")
-
-_DOCKER_BUILD_MARKERS = ("Step ", " ---> ", "Successfully built", "Successfully tagged")
 
 
 def ingest(source: Optional[str] = None) -> list[RawLogLine]:
@@ -65,11 +61,7 @@ def detect_format(lines: list[str]) -> str:
     if any(any(m in ln for m in _NPM_MARKERS) for ln in head):
         return "npm"
         
-    # This is the new check for Docker build output
     if any(any(m in ln for m in _DOCKER_BUILD_MARKERS) for ln in head):
-        return "docker"
-        
-    if _DOCKER_TS.match(non_empty[0]):
         return "docker"
         
     return "plaintext"

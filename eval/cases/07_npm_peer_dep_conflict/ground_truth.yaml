@@ -3,4 +3,5 @@ cause: "npm peer dependency conflict: react@18 required, react-dom@17 requires r
 cause_keywords: ["ERESOLVE", "peer", "react-dom", "dependency conflict"]
 cause_type: "direct"
 evidence_line_ids: [4, 12, 13]
+expected_format: "npm"
 expected_unknowns: []

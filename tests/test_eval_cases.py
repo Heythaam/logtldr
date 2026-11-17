@@ -38,6 +38,7 @@ def test_case_has_required_files(case_dir: Path) -> None:
 def test_ground_truth_fields(case_dir: Path) -> None:
     gt = _load_gt(case_dir)
     assert "status" in gt, f"{case_dir.name}: missing status"
+    assert "expected_format" in gt, f"{case_dir.name}: missing expected_format"
     assert gt["status"] in ("ok", "nothing_unusual", "not_enough_signal")
     if gt["status"] == "ok":
         assert "cause" in gt, f"{case_dir.name}: ok status requires cause"
