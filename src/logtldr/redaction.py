@@ -58,4 +58,7 @@ def redact(lines: list[LogLine]) -> list[LogLine]:
     redactor = Redactor()
     for line in lines:
         line.redacted_text = redactor.redact_text(line.original_text)
+        # CRITICAL FIX: Also redact the message field, as this is what
+        # Drain3 reads and puts into templates.
+        line.message = redactor.redact_text(line.message)
     return lines
