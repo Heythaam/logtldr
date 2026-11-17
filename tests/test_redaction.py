@@ -92,3 +92,23 @@ def test_redact_lines_pipeline() -> None:
     
     # Original text must remain untouched
     assert out[0].original_text == "IP is 1.1.1.1"
+
+
+def test_message_field_is_redacted() -> None:
+    """The message field must be redacted so Drain3 doesn't leak secrets."""
+    lines = [
+        LogLine(
+            line_id=1,
+            original_text="2024-01-01 INFO Connecting to postgresql://admin:secret@host",
+            message="Connecting to postgresql://admin:secret@host",
+            redacted_text="",
+            level="INFO",
+            source_format="plaintext",
+        )
+    ]
+    out = redact(lines)
+    
+    # Both text fields must be free of the secret
+    assert "secret" not in out[0].redacted_text
+    assert "secret" not in out[0].message
+    assert "db_url_1" in out[0].message
