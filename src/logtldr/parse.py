@@ -23,10 +23,15 @@ _LEVEL_ALIASES = {
 
 _DEFAULT_LEVEL = "INFO"
 
+# Added comma support for Zookeeper timestamps
 _ISO8601_RE = re.compile(
-    r"^(?P<ts>\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?"
+    r"^(?P<ts>\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?"
     r"(?:Z|[+-]\d{2}:?\d{2})?)(?:\s+|$)"
 )
+
+# Added specific regexes for Apache and HDFS
+_APACHE_RE = re.compile(r"^\[(?P<ts>[A-Z][a-z]{2}\s+[A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\]")
+_HDFS_RE = re.compile(r"^(?P<ts>\d{6}\s+\d{6})")
 
 _SYSLOG_RE = re.compile(
     r"^(?P<ts>[A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})"
@@ -109,6 +114,14 @@ def _parse_plaintext(line_id: int, raw: RawLogLine) -> LogLine:
     if m:
         timestamp = _parse_timestamp_str(m.group("ts"))
         rest = text[m.end():]
+    elif _APACHE_RE.match(text):
+        m = _APACHE_RE.match(text)
+        timestamp = _parse_timestamp_str(m.group("ts"))  # type: ignore
+        rest = text[m.end():]  # type: ignore
+    elif _HDFS_RE.match(text):
+        m = _HDFS_RE.match(text)
+        timestamp = _parse_timestamp_str(m.group("ts"))  # type: ignore
+        rest = text[m.end():]  # type: ignore
     else:
         m = _SYSLOG_RE.match(text)
         if m:
@@ -242,15 +255,35 @@ def _parse_timestamp_str(s: str) -> Optional[datetime]:
     s = s.strip()
     if not s:
         return None
+        
+    # Zookeeper uses a comma for fractional seconds
+    s = s.replace(",", ".")
+    
     if s.endswith("Z"):
         s = s[:-1] + "+00:00"
     s = _trim_fraction(s)
+    
     try:
         return datetime.fromisoformat(s)
     except ValueError:
         pass
     
     normalized = re.sub(r"\s+", " ", s)
+    
+    # HDFS format: 081109 203615
+    if len(normalized) == 13 and " " in normalized:
+        try:
+            return datetime.strptime(normalized, "%y%m%d %H%M%S")
+        except ValueError:
+            pass
+            
+    # Apache format: Sun Jan 15 10:00:01 2024
+    if normalized.startswith(("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")):
+        try:
+            return datetime.strptime(normalized, "%a %b %d %H:%M:%S %Y")
+        except ValueError:
+            pass
+
     m = re.match(r"^([A-Z][a-z]{2}) (\d{1,2}) (\d{2}:\d{2}:\d{2})$", normalized)
     if m:
         try:
