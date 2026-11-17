@@ -49,3 +49,8 @@ warn_redundant_casts = true
 testpaths = ["tests"]
 filterwarnings = ["error"]
 addopts = "-ra"
+
+
+[[tool.mypy.overrides]]
+module = ["drain3.*", "litellm.*"]
+ignore_missing_imports = true
