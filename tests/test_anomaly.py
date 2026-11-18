@@ -79,3 +79,52 @@ def test_new_template() -> None:
     # Verify t3 (Late)
     assert new_templates[1].template_ids == ["t3"]
     assert "Late-appearing" in new_templates[1].description
+
+def test_grouped_stack_trace() -> None:
+    """Consecutive stack trace lines should be grouped into one anomaly."""
+    lines = [
+        _make_line(1, level="INFO"),
+        _make_line(2, level="ERROR", message="Traceback (most recent call last):"),
+        _make_line(3, message="  File \"test.py\", line 12, in <module>"),
+        _make_line(4, message="    raise ValueError()"),
+        _make_line(5, level="INFO"),
+    ]
+    templates = []
+    assignments = {}
+
+    anomalies = detect_anomalies(lines, templates, assignments)
+    
+    stack_anomalies = [a for a in anomalies if a.type == "grouped_stack_trace"]
+    assert len(stack_anomalies) == 1
+    assert stack_anomalies[0].line_ids == [2, 3, 4]
+    assert "3 lines" in stack_anomalies[0].description
+
+
+def test_frequency_spike() -> None:
+    """A template occurring way too often in a bucket should be flagged."""
+    # 100 lines total. 10 buckets of 10 lines each.
+    lines = [_make_line(i) for i in range(1, 101)]
+    
+    # t1 only appears in Bucket 1 (lines 1-10). It's 10 occurrences in one bucket!
+    # The average across all 10 buckets is 10 / 10 = 1.
+    # 10 is > 5x the average, so it will trigger a spike.
+    assignments = {}
+    for i in range(1, 11):
+        lines[i-1] = _make_line(i, level="ERROR") # Must be ERROR to pass filter
+        assignments[i] = "t1"
+        
+    # t2 appears evenly across the remaining 90 lines.
+    for i in range(11, 101):
+        assignments[i] = "t2"
+
+    templates = [
+        Template(template_id="t1", pattern="spike", count=10, first_occurrence_line_id=1, last_occurrence_line_id=10),
+        Template(template_id="t2", pattern="normal", count=90, first_occurrence_line_id=11, last_occurrence_line_id=100),
+    ]
+
+    anomalies = detect_anomalies(lines, templates, assignments)
+    
+    spikes = [a for a in anomalies if a.type == "frequency_spike"]
+    assert len(spikes) == 1
+    assert spikes[0].template_ids == ["t1"]
+    assert "10 occurrences" in spikes[0].description
