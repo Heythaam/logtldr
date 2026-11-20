@@ -76,18 +76,17 @@ def main(argv: Optional[list[str]] = None) -> int:
             verdict=f"Refused by gate. Stats: {stats}"
         )
     else:
-        # 7. LLM GATEWAY
-        api_base = "http://localhost:11434" if args.local else "https://api.openai.com/v1"
+        # 7. COMPRESS → PROMPT → LLM GATEWAY
+        api_base = "http://localhost:11434" if args.local else None
         config = Config(model=args.model, api_base=api_base, local=args.local)
-        
-        gateway = LLMGateway(config)
         compressed_view = build_compressed_view(redacted_lines, templates, anomalies)
-        
-        # Call the LLM
-        llm_response = gateway.call_summarize(compressed_view, LLMResponse)
-        
-        # Assert type for mypy
-        assert isinstance(llm_response, LLMResponse)
+
+        try:
+            gateway = LLMGateway(config)
+            llm_response = gateway.call_summarize(compressed_view, LLMResponse)
+        except Exception as exc:  # CLI boundary: config, network, auth or bad-JSON failures
+            print(f"logtldr: LLM step failed: {exc}", file=sys.stderr)
+            return 1
 
         # 8. CITATION VALIDATE
         validated_response = validate_citations(llm_response, redacted_lines)

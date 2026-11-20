@@ -1,7 +1,7 @@
 """LiteLLM integration (AD-4)."""
 
 import json
-from typing import Any, Type
+from typing import Any, TypeVar
 from urllib.parse import urlparse
 
 import httpx
@@ -10,6 +10,9 @@ from pydantic import BaseModel, ValidationError
 
 from logtldr.config import Config
 from logtldr.models import CompressedView
+from logtldr.prompt import build_messages
+
+T = TypeVar("T", bound=BaseModel)
 
 
 class LLMGateway:
@@ -23,13 +26,16 @@ class LLMGateway:
 
         # 1. If --local, validate api_base is localhost
         if self.local:
+            if not self.api_base:
+                raise ValueError("--local mode requires an api_base (e.g. http://localhost:11434).")
             self._validate_localhost_endpoint(self.api_base)
 
-        # 2. If no API key and Ollama is not reachable, raise a clear error
-        if self.local and not config.api_key:
-            self._check_ollama_reachable(self.api_base)
+            # 2. If no API key and Ollama is not reachable, raise a clear error
+            if not config.api_key:
+                self._check_ollama_reachable(self.api_base)
 
-        # Set LiteLLM globals (as per AD-4)
+        # Set LiteLLM globals (as per AD-4). Always assign: None resets any endpoint
+        # left over from an earlier call, so LiteLLM routes by model prefix (xai/..., openai/...).
         litellm.api_base = self.api_base
         if config.api_key:
             litellm.api_key = config.api_key
@@ -57,20 +63,21 @@ class LLMGateway:
                 f"Check your config (api_base={api_base}) or provide an API key."
             )
 
-    def call_summarize(self, compressed_view: CompressedView, schema: Type[BaseModel]) -> BaseModel:
+    def call_summarize(self, compressed_view: CompressedView, schema: type[T]) -> T:
         """Call LLM and return validated structured output."""
-        prompt = self._build_prompt(compressed_view)
-        
+        messages = build_messages(compressed_view)
+
         for attempt in range(3):
+            raw_text = None
             try:
                 # 1. Try json_schema first (OpenAI/Claude support)
                 try:
                     response = litellm.completion(
                         model=self.model,
-                        messages=[{"role": "user", "content": prompt}],
+                        messages=messages,
                         temperature=self.config.temperature,
                         response_format={
-                            "type": "json_schema", 
+                            "type": "json_schema",
                             "json_schema": {"name": "summary", "schema": schema.model_json_schema()}
                         }
                     )
@@ -79,22 +86,32 @@ class LLMGateway:
                     # 2. Fallback: JSON mode + Pydantic validation (Ollama/older models)
                     response = litellm.completion(
                         model=self.model,
-                        messages=[{"role": "user", "content": prompt}],
+                        messages=messages,
                         temperature=self.config.temperature,
                         **self._get_ollama_params()
                     )
                     raw_text = response.choices[0].message.content  # type: ignore
-                
+
                 if not raw_text:
                     raise ValueError("LLM returned an empty response.")
 
                 # 3. Validate and parse
                 return schema.model_validate_json(raw_text)
-            
+
             except (json.JSONDecodeError, ValidationError, ValueError) as e:
                 if attempt < 2:
-                    # 4. Feed the validation error back into the prompt for the next attempt
-                    prompt += f"\n\n[Validation error: {str(e)[:200]}. Please return valid JSON.]"
+                    # 4. Show the model its bad reply and the error, then ask again
+                    retry: list[dict[str, str]] = []
+                    if raw_text:
+                        retry.append({"role": "assistant", "content": str(raw_text)})
+                    retry.append({
+                        "role": "user",
+                        "content": (
+                            f"Your previous reply was not valid: {str(e)[:300]}. "
+                            "Reply again with only the JSON object."
+                        ),
+                    })
+                    messages = [*messages, *retry]
                     continue
                 else:
                     # 5. Give up after 3 failures
@@ -110,8 +127,3 @@ class LLMGateway:
         if "ollama" in self.model:
             return {"num_ctx": self.config.num_ctx}
         return {}
-
-    def _build_prompt(self, compressed_view: CompressedView) -> str:
-        """Build the prompt sent to the LLM."""
-        # Note: We will implement the exact prompt in a later ticket.
-        return f"Analyze this log data and return JSON:\n{compressed_view.model_dump_json(indent=2)}"
