@@ -21,6 +21,7 @@ DISK_FULL = ExpectedOutcome(
     case_id="08_github_actions_disk_full",
     expected_status="ok",
     cause_keywords=["disk", "space"],
+    evidence_line_ids=[2, 3],
 )
 HEALTHY = ExpectedOutcome(case_id="09_healthy_ci_run", expected_status="nothing_unusual")
 UNKNOWN = ExpectedOutcome(case_id="unknown_case", expected_status="not_enough_signal")
@@ -42,20 +43,35 @@ def test_correct_with_valid_citations() -> None:
     )
     score = score_case(DISK_FULL, summary, LINES)
     assert score.correct
-    assert score.cause_match and score.citations_valid
+    assert score.evidence_overlap and score.citations_valid
     assert score.reason == ""
 
 
-def test_wrong_cause() -> None:
+def test_wrong_evidence_lines() -> None:
+    """LLM cites line 1 (a benign log line) instead of the error lines."""
     summary = _summary(
         "Network timeout contacting registry",
-        [Citation(line_id=2, snippet="No space left on device")],
+        [Citation(line_id=1, snippet="Starting build step 3/7")],
     )
     score = score_case(DISK_FULL, summary, LINES)
     assert not score.correct
-    assert not score.cause_match
-    assert score.citations_valid
-    assert set(score.missing_keywords) == {"disk", "space"}
+    assert not score.evidence_overlap
+    assert score.citations_valid  # citation itself is valid (line exists, snippet matches)
+    assert not score.keywords_matched
+
+
+def test_keywords_are_soft_signal() -> None:
+    """Wrong keywords but correct evidence lines = still correct."""
+    summary = _summary(
+        "Build process terminated unexpectedly",  # no "disk" or "space"
+        [Citation(line_id=2, snippet="No space left on device")],
+    )
+    score = score_case(DISK_FULL, summary, LINES)
+    assert score.correct  # evidence overlap + valid citations = correct
+    assert score.evidence_overlap
+    assert not score.keywords_matched  # keywords miss, but that's ok
+    assert set(score.missing_keywords) == {"disk"}  # "space" found in citation snippet
+    assert "soft:" in score.reason  # keywords reported as soft signal
 
 
 def test_false_positive_on_healthy() -> None:
@@ -75,7 +91,7 @@ def test_healthy_correct_is_not_false_positive() -> None:
     assert score.correct and not score.false_positive
 
 
-def test_right_cause_but_invalid_citation_is_incorrect() -> None:
+def test_right_evidence_but_invalid_citation_is_incorrect() -> None:
     summary = _summary(
         "disk space exhausted",
         [
@@ -84,7 +100,7 @@ def test_right_cause_but_invalid_citation_is_incorrect() -> None:
         ],
     )
     score = score_case(DISK_FULL, summary, LINES)
-    assert score.cause_match
+    assert score.evidence_overlap
     assert not score.citations_valid
     assert not score.correct
 
@@ -120,3 +136,19 @@ def test_unknowns_scored_separately() -> None:
     assert report.unknown_total == 2
     assert report.unknown_correct == 1
     assert report.fabricated == 1
+
+
+def test_no_evidence_line_ids_skips_overlap_check() -> None:
+    """When ground truth has no evidence_line_ids, evidence check passes."""
+    no_evidence = ExpectedOutcome(
+        case_id="legacy_case",
+        expected_status="ok",
+        cause_keywords=["disk"],
+    )
+    summary = _summary(
+        "disk failure",
+        [Citation(line_id=2, snippet="No space left on device")],
+    )
+    score = score_case(no_evidence, summary, LINES)
+    assert score.correct  # no evidence_line_ids = skip overlap check
+    assert score.evidence_overlap  # treated as pass

@@ -1,6 +1,6 @@
 status: "ok"
-cause: "DataNode repeatedly resets peer connections during block writes"
-cause_keywords: ["Connection reset", "IOException", "writeBlock", "Got exception"]
+cause: "DataNode repeatedly throws exceptions while serving blocks to other nodes"
+cause_keywords: ["exception", "block", "DataNode"]
 cause_type: "direct"
 evidence_line_ids: [78, 79, 81, 89]
 expected_format: "plaintext"

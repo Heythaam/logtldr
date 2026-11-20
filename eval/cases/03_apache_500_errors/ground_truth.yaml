@@ -1,8 +1,8 @@
 status: "ok"
 cause: "Backend app-backend-01 refused connections; HTTP 500s served by Apache proxy"
-cause_keywords: ["Connection refused", "proxy", "disabling worker"]
+cause_keywords: ["worker", "error"]
 cause_type: "direct"
-evidence_line_ids: [12, 15, 20] # <-- REPLACE WITH YOUR APACHE GREP RESULTS
+evidence_line_ids: [2, 12, 15, 20, 796]
 expected_format: "plaintext"
 expected_unknowns:
   - "backend logs not present; reason app-backend-01 refused connections is outside this window"

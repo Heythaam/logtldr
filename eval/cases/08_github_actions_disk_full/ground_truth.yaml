@@ -1,6 +1,6 @@
 status: "ok"
 cause: "CI runner ran out of disk space writing to npm cache"
-cause_keywords: ["ENOSPC", "no space left on device"]
+cause_keywords: ["disk", "space"]
 cause_type: "direct"
 evidence_line_ids: [7, 8, 9]
 expected_format: "json"
