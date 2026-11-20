@@ -1,0 +1,11 @@
+{"time":"2024-01-15T10:23:45Z","level":"info","msg":"Runner started"}
+{"time":"2024-01-15T10:23:50Z","level":"info","msg":"Checking out repository"}
+{"time":"2024-01-15T10:24:10Z","level":"info","msg":"Setting up Node 20"}
+{"time":"2024-01-15T10:24:25Z","level":"info","msg":"Installing dependencies"}
+{"time":"2024-01-15T10:26:30Z","level":"info","msg":"Running build"}
+{"time":"2024-01-15T10:27:10Z","level":"info","msg":"Writing build artifacts to /home/runner/.npm/_cacache"}
+{"time":"2024-01-15T10:27:15Z","level":"error","msg":"ENOSPC: no space left on device, write","file":"/home/runner/.npm/_cacache"}
+{"time":"2024-01-15T10:27:15Z","level":"error","msg":"npm ERR! code ENOSPC"}
+{"time":"2024-01-15T10:27:15Z","level":"error","msg":"npm ERR! nospc ENOSPC: no space left on device"}
+{"time":"2024-01-15T10:27:16Z","level":"error","msg":"The runner has received a shutdown signal"}
+{"time":"2024-01-15T10:27:16Z","level":"error","msg":"Job failed with exit code 1"}
