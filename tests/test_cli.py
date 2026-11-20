@@ -86,10 +86,21 @@ def test_cli_json_mode(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """`--json` emits parseable JSON with status 'ok'."""
-    # Setup the mock
+    # Setup the mock with a valid hypothesis and citation
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
-    mock_response.choices[0].message.content = '{"status": "ok", "verdict": "Mocked LLM response"}'
+    mock_response.choices[0].message.content = json.dumps({
+        "status": "ok",
+        "verdict": "Mocked LLM response",
+        "hypotheses": [
+            {
+                "cause": "Mocked cause",
+                "evidence_type": "direct",
+                "confidence": "high",
+                "citations": [{"line_id": 55, "snippet": "ERROR boom"}]
+            }
+        ]
+    })
     mock_completion.return_value = mock_response
 
     lines = [f"2024-01-15T10:00:00Z INFO line {i}" for i in range(54)]

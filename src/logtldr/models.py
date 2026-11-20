@@ -145,6 +145,9 @@ class Citation(BaseModel):
         ...,
         description="Short verbatim excerpt from the redacted line, as cited by the LLM",
     )
+    citation_valid: bool = Field(
+        True, description="Set to False by the code if the snippet/line_id is invalid"
+    )
 
 
 class Hypothesis(BaseModel):
