@@ -6,10 +6,11 @@ from typing import NoReturn, Optional
 
 from logtldr.anomaly_detector import detect_anomalies
 from logtldr.citation_validator import validate_citations
+from logtldr.compressed_view import build_compressed_view
 from logtldr.config import Config
 from logtldr.drain_wrapper import template_logs
 from logtldr.ingest import ingest
-from logtldr.llm_gateway import LLMGateway, build_compressed_view
+from logtldr.llm_gateway import LLMGateway
 from logtldr.models import FinalSummary, LLMResponse
 from logtldr.parse import parse
 from logtldr.redaction import redact
