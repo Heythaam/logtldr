@@ -1,9 +1,12 @@
 """Tests for LLM Gateway configuration (LT-16)."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from logtldr.config import Config
 from logtldr.llm_gateway import LLMGateway
+from logtldr.models import CompressedView, LLMResponse
 
 
 def test_local_rejects_non_localhost() -> None:
@@ -43,3 +46,82 @@ def test_remote_with_api_key_succeeds() -> None:
     # Should not raise any errors because local=False skips checks
     gateway = LLMGateway(config)
     assert gateway.local is False
+
+# ... (keep your existing local/remote tests) ...
+
+
+@patch("litellm.completion")
+def test_json_schema_success(mock_completion: MagicMock) -> None:
+    """The gateway should successfully parse a valid JSON response."""
+    # Mock the LLM returning perfect JSON on the first try
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = '{"status": "ok", "verdict": "All clear"}'
+    mock_completion.return_value = mock_response
+
+    config = Config(model="gpt-4o", api_base="http://localhost:11434", local=True, api_key="dummy-key")
+    gateway = LLMGateway(config)
+    
+    view = CompressedView(
+        templates=[], anomalies=[], timeline_candidates=[], sample_lines=[], 
+        statistics={}, metadata={}, estimated_tokens=0
+    )
+    
+    result = gateway.call_summarize(view, LLMResponse)
+    
+    assert isinstance(result, LLMResponse)
+    assert result.status == "ok"
+    assert result.verdict == "All clear"
+    assert mock_completion.call_count == 1
+
+
+@patch("litellm.completion")
+def test_retry_on_invalid_json(mock_completion: MagicMock) -> None:
+    """The gateway should retry if the first response is invalid JSON."""
+    # Mock the LLM returning invalid JSON, then valid JSON
+    mock_bad = MagicMock()
+    mock_bad.choices = [MagicMock()]
+    mock_bad.choices[0].message.content = '{"status": "ok", verdict: missing_quotes}'  # Invalid JSON
+
+    mock_good = MagicMock()
+    mock_good.choices = [MagicMock()]
+    mock_good.choices[0].message.content = '{"status": "ok", "verdict": "Fixed on retry"}'
+
+    mock_completion.side_effect = [mock_bad, mock_good]
+
+    config = Config(model="gpt-4o", api_base="http://localhost:11434", local=True, api_key="dummy-key")
+    gateway = LLMGateway(config)
+    
+    view = CompressedView(
+        templates=[], anomalies=[], timeline_candidates=[], sample_lines=[], 
+        statistics={}, metadata={}, estimated_tokens=0
+    )
+    
+    result = gateway.call_summarize(view, LLMResponse)
+    
+    assert result.verdict == "Fixed on retry"
+    assert mock_completion.call_count == 2  # It tried twice
+
+
+@patch("litellm.completion")
+def test_max_retries_exceeded(mock_completion: MagicMock) -> None:
+    """After 3 failures, it should raise a RuntimeError with a clear message."""
+    # Mock the LLM always returning garbage
+    mock_bad = MagicMock()
+    mock_bad.choices = [MagicMock()]
+    mock_bad.choices[0].message.content = 'I am not JSON at all.'
+    
+    mock_completion.return_value = mock_bad
+
+    config = Config(model="gpt-4o", api_base="http://localhost:11434", local=True, api_key="dummy-key")
+    gateway = LLMGateway(config)
+    
+    view = CompressedView(
+        templates=[], anomalies=[], timeline_candidates=[], sample_lines=[], 
+        statistics={}, metadata={}, estimated_tokens=0
+    )
+    
+    with pytest.raises(RuntimeError, match="LLM returned invalid JSON after 3 attempts"):
+        gateway.call_summarize(view, LLMResponse)
+        
+    assert mock_completion.call_count == 3  # It tried exactly 3 times
