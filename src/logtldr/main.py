@@ -6,10 +6,11 @@ from typing import NoReturn, Optional
 
 from logtldr.anomaly_detector import detect_anomalies
 from logtldr.citation_validator import validate_citations
+from logtldr.config import Config
 from logtldr.drain_wrapper import template_logs
 from logtldr.ingest import ingest
-from logtldr.llm_gateway import build_compressed_view, summarize
-from logtldr.models import FinalSummary
+from logtldr.llm_gateway import LLMGateway, build_compressed_view
+from logtldr.models import FinalSummary, LLMResponse
 from logtldr.parse import parse
 from logtldr.redaction import redact
 from logtldr.refuse_gate import check_refuse_gate
@@ -75,8 +76,17 @@ def main(argv: Optional[list[str]] = None) -> int:
         )
     else:
         # 7. LLM GATEWAY
+        api_base = "http://localhost:11434" if args.local else "https://api.openai.com/v1"
+        config = Config(model=args.model, api_base=api_base, local=args.local)
+        
+        gateway = LLMGateway(config)
         compressed_view = build_compressed_view(redacted_lines, templates, anomalies)
-        llm_response = summarize(compressed_view)
+        
+        # Call the LLM
+        llm_response = gateway.call_summarize(compressed_view, LLMResponse)
+        
+        # Assert type for mypy
+        assert isinstance(llm_response, LLMResponse)
 
         # 8. CITATION VALIDATE
         validated_response = validate_citations(llm_response, redacted_lines)
