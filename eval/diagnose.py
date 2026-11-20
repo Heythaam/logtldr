@@ -63,7 +63,7 @@ def main() -> None:
         redacted = redact(lines)
         templates, assignments = template_logs(redacted)
         anomalies = detect_anomalies(redacted, templates, assignments)
-        gate = check_refuse_gate(anomalies)
+        gate, _ = check_refuse_gate(redacted, anomalies)
 
         # Format anomalies
         if anomalies:

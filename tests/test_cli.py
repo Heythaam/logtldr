@@ -57,11 +57,15 @@ def test_cli_reads_stdin(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """`logtldr` with piped input exits 0 and reports what it read."""
-    monkeypatch.setattr("sys.stdin", io.StringIO("first\nsecond\n"))
+    # 54 INFO lines + 1 ERROR line = 55 lines, triggers an anomaly
+    lines = [f"2024-01-15T10:00:00Z INFO line {i}" for i in range(54)]
+    lines.append("2024-01-15T10:00:00Z ERROR boom")
+    input_text = "\n".join(lines)
+    
+    monkeypatch.setattr("sys.stdin", io.StringIO(input_text))
     rc = main([])
     assert rc == 0
     out = capsys.readouterr().out
-    # Updated for LT-45: It now outputs the stub LLM response
     assert "Stub LLM response" in out
 
 
@@ -69,7 +73,11 @@ def test_cli_json_mode(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """`--json` emits parseable JSON with status 'ok'."""
-    monkeypatch.setattr("sys.stdin", io.StringIO("x\n"))
+    lines = [f"2024-01-15T10:00:00Z INFO line {i}" for i in range(54)]
+    lines.append("2024-01-15T10:00:00Z ERROR boom")
+    input_text = "\n".join(lines)
+    
+    monkeypatch.setattr("sys.stdin", io.StringIO(input_text))
     rc = main(["--json"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
