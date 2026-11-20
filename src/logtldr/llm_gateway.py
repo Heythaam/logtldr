@@ -78,17 +78,20 @@ class LLMGateway:
         
         for attempt in range(3):
             try:
-                # Try json_schema first (OpenAI/Claude support)
+                # 1. Try json_schema first (OpenAI/Claude support)
                 try:
                     response = litellm.completion(
                         model=self.model,
                         messages=[{"role": "user", "content": prompt}],
                         temperature=self.config.temperature,
-                        response_format={"type": "json_schema", "json_schema": {"name": "summary", "schema": schema.model_json_schema()}}
+                        response_format={
+                            "type": "json_schema", 
+                            "json_schema": {"name": "summary", "schema": schema.model_json_schema()}
+                        }
                     )
                     raw_text = response.choices[0].message.content  # type: ignore
                 except Exception:
-                    # Fallback: JSON mode + Pydantic validation
+                    # 2. Fallback: JSON mode + Pydantic validation (Ollama/older models)
                     response = litellm.completion(
                         model=self.model,
                         messages=[{"role": "user", "content": prompt}],
@@ -97,23 +100,25 @@ class LLMGateway:
                     )
                     raw_text = response.choices[0].message.content  # type: ignore
                 
-                # Validate and parse
                 if not raw_text:
-                    raise ValueError("LLM returned empty response")
+                    raise ValueError("LLM returned an empty response.")
+
+                # 3. Validate and parse
                 return schema.model_validate_json(raw_text)
             
             except (json.JSONDecodeError, ValidationError, ValueError) as e:
                 if attempt < 2:
-                    # Feed validation error back in retry prompt
+                    # 4. Feed the validation error back into the prompt for the next attempt
                     prompt += f"\n\n[Validation error: {str(e)[:200]}. Please return valid JSON.]"
                     continue
                 else:
+                    # 5. Give up after 3 failures
                     raise RuntimeError(
                         f"LLM returned invalid JSON after 3 attempts: {e}. "
                         f"Check model capacity (try a larger model or API model)."
                     )
         
-        raise RuntimeError("Unreachable")
+        raise RuntimeError("Unreachable")  # Satisfy mypy
 
     def _get_ollama_params(self) -> dict[str, Any]:
         """Ollama-specific parameters."""
