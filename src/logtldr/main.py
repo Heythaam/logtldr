@@ -67,9 +67,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     anomalies = detect_anomalies(redacted_lines, templates, assignments)
 
     # 6. REFUSE GATE
-    gate_status = check_refuse_gate(anomalies)
+    gate_status, stats = check_refuse_gate(redacted_lines, anomalies)
     if gate_status != "proceed":
-        final_summary = FinalSummary(status=gate_status, verdict="Refused by gate.")
+        final_summary = FinalSummary(
+            status=gate_status, 
+            verdict=f"Refused by gate. Stats: {stats}"
+        )
     else:
         # 7. LLM GATEWAY
         compressed_view = build_compressed_view(redacted_lines, templates, anomalies)
