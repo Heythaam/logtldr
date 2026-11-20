@@ -3,8 +3,11 @@
 Scores a FinalSummary against a case's expected outcome.
 
 Case kinds, derived from the expected status:
-- "diagnosis" (expected "ok"): correct = status "ok" AND every cause keyword
-  appears in the top hypothesis AND every citation on it is valid.
+- "diagnosis" (expected "ok"): correct = status "ok" AND the LLM's cited
+  line_ids overlap with the ground-truth evidence_line_ids (≥1 common line)
+  AND every citation on the top hypothesis is valid.
+  Keywords are checked as a soft signal against the full response text
+  (verdict + cause + citation snippets) but do NOT affect correctness.
 - "healthy" (expected "nothing_unusual"): correct = status "nothing_unusual".
   A summary with status "ok" is a FALSE POSITIVE (a cause invented for a
   healthy log).
@@ -40,7 +43,11 @@ class ExpectedOutcome(BaseModel):
     expected_status: Literal["ok", "nothing_unusual", "not_enough_signal"]
     cause_keywords: list[str] = Field(
         default_factory=list,
-        description="All must appear (case-insensitive) in the top hypothesis cause",
+        description="Soft signal: checked against full response text but not required for correct",
+    )
+    evidence_line_ids: list[int] = Field(
+        default_factory=list,
+        description="Ground-truth line IDs the LLM should cite (≥1 overlap required)",
     )
 
     @property
@@ -56,8 +63,11 @@ class CaseScore:
     kind: CaseKind
     actual_status: str
     correct: bool
-    cause_match: bool = False
+    evidence_overlap: bool = False
+    evidence_matched: tuple[int, ...] = ()
+    evidence_expected: tuple[int, ...] = ()
     citations_valid: bool = False
+    keywords_matched: bool = False
     false_positive: bool = False
     fabricated: bool = False
     missing_keywords: tuple[str, ...] = ()
@@ -127,8 +137,15 @@ class ScoreReport:
                 "total": self.unknown_total,
                 "fabricated": self.fabricated,
             },
-            "cases": [c.__dict__ | {"missing_keywords": list(c.missing_keywords)}
-                      for c in self.cases],
+            "cases": [
+                c.__dict__
+                | {
+                    "missing_keywords": list(c.missing_keywords),
+                    "evidence_matched": list(c.evidence_matched),
+                    "evidence_expected": list(c.evidence_expected),
+                }
+                for c in self.cases
+            ],
         }
 
 
@@ -145,9 +162,46 @@ def _citations_valid(hypothesis: Hypothesis, lines: list[LogLine]) -> bool:
     return all(_citation_ok(c, line_dict) for c in hypothesis.citations)
 
 
-def _missing_keywords(cause: str, keywords: list[str]) -> tuple[str, ...]:
-    text = cause.casefold()
-    return tuple(k for k in keywords if k.casefold() not in text)
+def _cited_line_ids(summary: FinalSummary) -> set[int]:
+    """Collect all line_ids cited across all hypotheses."""
+    ids: set[int] = set()
+    for hyp in summary.hypotheses or []:
+        for cit in hyp.citations or []:
+            ids.add(cit.line_id)
+    return ids
+
+
+def _evidence_overlap(
+    summary: FinalSummary, expected_ids: list[int]
+) -> tuple[bool, tuple[int, ...]]:
+    """Check if cited lines overlap with expected evidence lines.
+
+    Returns (has_overlap, matched_ids).
+    If no evidence_line_ids in ground truth, skip the check (pass).
+    """
+    if not expected_ids:
+        # No evidence lines specified — can't check, treat as pass
+        return True, ()
+    cited = _cited_line_ids(summary)
+    matched = sorted(cited & set(expected_ids))
+    return len(matched) >= 1, tuple(matched)
+
+
+def _full_response_text(summary: FinalSummary) -> str:
+    """Build searchable text from the full LLM response for keyword soft-match."""
+    parts: list[str] = []
+    if summary.verdict:
+        parts.append(summary.verdict)
+    for hyp in summary.hypotheses or []:
+        parts.append(hyp.cause)
+        for cit in hyp.citations or []:
+            parts.append(cit.snippet)
+    return " ".join(parts).casefold()
+
+
+def _missing_keywords(full_text: str, keywords: list[str]) -> tuple[str, ...]:
+    """Check keywords against the full response text (casefold)."""
+    return tuple(k for k in keywords if k.casefold() not in full_text)
 
 
 def score_case(
@@ -173,30 +227,51 @@ def score_case(
             reason="cause reported where none is determinable" if fabricated else "",
         )
 
-    # diagnosis
+    # --- diagnosis ---
     if status != "ok" or not summary.hypotheses:
         return CaseScore(
             case_id=expected.case_id, kind=kind, actual_status=status, correct=False,
-            missing_keywords=tuple(expected.cause_keywords),
+            evidence_expected=tuple(expected.evidence_line_ids),
             reason=f"expected a diagnosis, got status={status!r}",
         )
 
     top = summary.hypotheses[0]
-    missing = _missing_keywords(top.cause, expected.cause_keywords)
-    cause_match = not missing
+
+    # Tier 2: evidence-line overlap (primary correctness signal)
+    has_overlap, matched = _evidence_overlap(summary, expected.evidence_line_ids)
+
+    # Citations validity (re-checked independently)
     citations_valid = _citations_valid(top, lines)
 
+    # Tier 3: keywords as soft signal (not required for correct)
+    full_text = _full_response_text(summary)
+    missing = _missing_keywords(full_text, expected.cause_keywords)
+    keywords_matched = not missing
+
+    # Correct = status ok + evidence overlap + citations valid
+    correct = has_overlap and citations_valid
+
     reasons = []
-    if not cause_match:
-        reasons.append(f"missing keywords: {', '.join(missing)}")
+    if not has_overlap:
+        cited = sorted(_cited_line_ids(summary))
+        reasons.append(
+            f"no evidence overlap: cited {cited}, expected {expected.evidence_line_ids}"
+        )
     if not citations_valid:
         reasons.append("top hypothesis has missing or invalid citations")
+    if not keywords_matched:
+        reasons.append(f"soft: missing keywords: {', '.join(missing)}")
 
     return CaseScore(
         case_id=expected.case_id, kind=kind, actual_status=status,
-        correct=cause_match and citations_valid,
-        cause_match=cause_match, citations_valid=citations_valid,
-        missing_keywords=missing, reason="; ".join(reasons),
+        correct=correct,
+        evidence_overlap=has_overlap,
+        evidence_matched=matched,
+        evidence_expected=tuple(expected.evidence_line_ids),
+        citations_valid=citations_valid,
+        keywords_matched=keywords_matched,
+        missing_keywords=missing,
+        reason="; ".join(reasons),
     )
 
 

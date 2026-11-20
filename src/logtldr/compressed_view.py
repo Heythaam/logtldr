@@ -83,7 +83,8 @@ def _candidate_line_ids(
 
 
 def build_compressed_view(
-    lines: list[LogLine], templates: list[Template], anomalies: list[Anomaly]
+    lines: list[LogLine], templates: list[Template], anomalies: list[Anomaly],
+    max_tokens: int = _MAX_TOKENS,
 ) -> CompressedView:
     """Build a deterministic CompressedView under the 8000 token budget."""
     if not lines:
@@ -94,7 +95,7 @@ def build_compressed_view(
 
     total_lines = len(lines)
     line_dict = {line.line_id: line for line in lines}
-    budget = _MAX_TOKENS - _SAFETY_MARGIN
+    budget = max_tokens - _SAFETY_MARGIN
 
     # 1. Fixed part: top templates, statistics, metadata
     templates_data = [
@@ -163,6 +164,6 @@ def build_compressed_view(
             estimated_tokens=0,
         )
         view.estimated_tokens = _count_view(view)
-        if view.estimated_tokens <= _MAX_TOKENS or not samples:
+        if view.estimated_tokens <= max_tokens or not samples:
             return view
         del samples[-max(1, len(samples) // 20):]  # drop lowest-priority 5%
