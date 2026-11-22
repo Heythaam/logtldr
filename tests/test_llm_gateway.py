@@ -124,3 +124,24 @@ def test_max_retries_exceeded(mock_completion: MagicMock) -> None:
         gateway.call_summarize(view, LLMResponse)
         
     assert mock_completion.call_count == 3  # It tried exactly 3 times
+
+
+
+def test_langfuse_disabled_in_local_mode() -> None:
+    """Local mode should not initialize Langfuse or set LiteLLM callbacks."""
+    import litellm
+
+    from logtldr.config import Config
+    from logtldr.llm_gateway import LLMGateway
+    
+    # Reset callbacks to a known state
+    litellm.success_callback = []
+    litellm.failure_callback = []
+
+    # Add api_key to bypass the Ollama check
+    config = Config(model="ollama/qwen2.5:7b", api_base="http://localhost:11434", local=True, api_key="dummy-key")
+    gateway = LLMGateway(config)
+    
+    assert gateway.local is True
+    assert litellm.success_callback == []
+    assert litellm.failure_callback == []
