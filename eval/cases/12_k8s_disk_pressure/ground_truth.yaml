@@ -1,0 +1,8 @@
+status: "ok"
+cause: "Node node-2 disk pressure caused pod evictions (ephemeral-storage exceeded threshold)"
+cause_keywords: ["disk", "evict"]
+cause_type: "direct"
+evidence_line_ids: [168, 169, 170, 172, 173, 175, 176, 177, 180, 181]
+expected_format: "plaintext"
+expected_unknowns:
+  - "which workload filled ephemeral storage (container logs, emptyDir, or image layers) cannot be determined from events alone"

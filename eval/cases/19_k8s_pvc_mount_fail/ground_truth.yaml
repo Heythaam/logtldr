@@ -1,0 +1,9 @@
+status: "ok"
+cause: "elasticsearch-data-0 stuck in ContainerCreating: PVC not found and NFS mount to 10.0.0.5 timed out"
+cause_keywords: ["mount", "PVC"]
+cause_type: "direct"
+evidence_line_ids: [187, 188, 189, 190, 193, 194, 195]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the NFS server 10.0.0.5 is down or a network policy blocks the mount requires checking the NFS server and network"
+  - "whether the PVC was deleted or never provisioned is not visible in these events"

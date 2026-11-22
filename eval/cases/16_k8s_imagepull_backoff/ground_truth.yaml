@@ -1,0 +1,8 @@
+status: "ok"
+cause: "notification-svc ImagePullBackOff: image tag v3.0.0-rc1 not found in registry"
+cause_keywords: ["ImagePull", "not found"]
+cause_type: "direct"
+evidence_line_ids: [156, 157, 158, 160, 161, 162, 165]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the tag was never pushed, was deleted, or is a typo cannot be determined from these events"
