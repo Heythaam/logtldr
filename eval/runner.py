@@ -92,7 +92,7 @@ def run_pipeline(log_path: Path) -> tuple[FinalSummary, list, bool]:
     assert isinstance(llm_response, LLMResponse)
 
     validated = validate_citations(llm_response, redacted)
-    final_summary = apply_rules(validated)
+    final_summary = apply_rules(validated, redacted)
 
     return final_summary, redacted, True
 
