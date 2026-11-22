@@ -40,6 +40,14 @@ class LLMGateway:
         if config.api_key:
             litellm.api_key = config.api_key
 
+        # NEW LANGFUSE LOGIC - DO NOT IMPORT LITELLM HERE
+        if not self.local:
+            try:
+                litellm.success_callback = ["langfuse"]
+                litellm.failure_callback = ["langfuse"]
+            except Exception:
+                pass
+
     def _validate_localhost_endpoint(self, api_base: str) -> None:
         """Check that api_base is localhost. Fails closed."""
         parsed = urlparse(api_base)

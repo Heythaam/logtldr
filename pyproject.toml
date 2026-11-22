@@ -12,6 +12,7 @@ dependencies = [
     "drain3",
     "litellm",
     "pydantic",
+    "langfuse",
 ]
 
 [project.optional-dependencies]
