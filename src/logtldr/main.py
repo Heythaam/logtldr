@@ -109,7 +109,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         validated_response = validate_citations(llm_response, redacted_lines)
 
         # 9. RULES ENGINE
-        final_summary = apply_rules(validated_response)
+        final_summary = apply_rules(validated_response, redacted_lines)
 
     # 10. RENDER
     if args.as_json:
