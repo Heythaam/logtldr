@@ -64,19 +64,30 @@ def test_cli_reads_stdin(
     # Setup the mock to return a fake JSON response
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
-    mock_response.choices[0].message.content = '{"status": "ok", "verdict": "Mocked LLM response"}'
+    mock_response.choices[0].message.content = json.dumps({
+        "status": "ok",
+        "verdict": "Mocked LLM response",
+        "hypotheses": [
+            {
+                "cause": "boom happened",
+                "evidence_type": "direct",
+                "confidence": "high",
+                "citations": [{"line_id": 55, "snippet": "ERROR boom"}],
+            }
+        ],
+    })
     mock_completion.return_value = mock_response
 
     # 54 INFO lines + 1 ERROR line = 55 lines, triggers an anomaly
     lines = [f"2024-01-15T10:00:00Z INFO line {i}" for i in range(54)]
     lines.append("2024-01-15T10:00:00Z ERROR boom")
     input_text = "\n".join(lines)
-    
+
     monkeypatch.setattr("sys.stdin", io.StringIO(input_text))
     rc = main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Mocked LLM response" in out
+    assert "Evidence points to boom happened, confidence: medium" in out
 
 
 @patch("litellm.completion")
