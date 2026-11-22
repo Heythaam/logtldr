@@ -1,4 +1,4 @@
-"""Tests for evidence typing rules (LT-25)."""
+"""Tests for evidence typing and confidence capping (LT-25 & LT-26)."""
 
 from logtldr.models import Citation, Hypothesis, LLMResponse, LogLine
 from logtldr.rules_engine import apply_rules
@@ -24,9 +24,10 @@ def _make_hyp(evidence: str, confidence: str, citations: list[Citation]) -> Hypo
     )
 
 
+# --- LT-25 Tests ---
+
 def test_direct_evidence_in_catalog() -> None:
     """A direct claim with an ERROR line matching the catalog is kept."""
-    # 'OOMKilled' is in the catalog
     lines = [
         _make_line(1, "INFO", "Starting up"),
         _make_line(2, "FATAL", "Container OOMKilled with exit code 137"),
@@ -38,17 +39,44 @@ def test_direct_evidence_in_catalog() -> None:
     result = apply_rules(response, lines)
     final_hyp = result.hypotheses[0]  # type: ignore
 
-    # It should remain direct and high confidence
     assert final_hyp.evidence_type == "direct"
     assert final_hyp.confidence == "high"
 
 
-def test_downgrade_temporal_to_medium() -> None:
-    """Temporal evidence should never be high confidence."""
+def test_unmatched_direct_becomes_temporal() -> None:
+    """An invalid direct claim is downgraded to temporal."""
+    lines = [_make_line(1, "ERROR", "Something entirely undocumented failed")]
+    citations = [Citation(line_id=1, snippet="undocumented")]
+    hyp = _make_hyp("direct", "high", citations)
+    response = LLMResponse(status="ok", hypotheses=[hyp])
+
+    result = apply_rules(response, lines)
+    final_hyp = result.hypotheses[0]  # type: ignore
+
+    assert final_hyp.evidence_type == "temporal"
+    assert final_hyp.confidence == "medium"
+
+
+def test_direct_claim_on_info_line_becomes_temporal() -> None:
+    """A direct claim citing only INFO lines is downgraded."""
+    lines = [_make_line(1, "INFO", "Container OOMKilled with exit code 137")]
+    citations = [Citation(line_id=1, snippet="OOMKilled")]
+    hyp = _make_hyp("direct", "high", citations)
+    response = LLMResponse(status="ok", hypotheses=[hyp])
+
+    result = apply_rules(response, lines)
+    final_hyp = result.hypotheses[0]  # type: ignore
+
+    assert final_hyp.evidence_type == "temporal"
+    assert final_hyp.confidence == "medium"
+
+
+# --- LT-26 Tests ---
+
+def test_temporal_cap_medium() -> None:
+    """Temporal evidence proposed as 'high' is capped to 'medium'."""
     lines = [_make_line(1, "WARN", "Something odd happened")]
     citations = [Citation(line_id=1, snippet="odd")]
-    
-    # LLM tries to give a temporal finding high confidence
     hyp = _make_hyp("temporal", "high", citations)
     response = LLMResponse(status="ok", hypotheses=[hyp])
 
@@ -59,38 +87,32 @@ def test_downgrade_temporal_to_medium() -> None:
     assert final_hyp.confidence == "medium"
 
 
-def test_unmatched_direct_becomes_temporal() -> None:
-    """An invalid direct claim is downgraded to temporal."""
-    # The line is an ERROR, but doesn't match any keyword in direct_causes.yaml
-    lines = [
-        _make_line(1, "ERROR", "Something entirely undocumented failed"),
-    ]
-    citations = [Citation(line_id=1, snippet="undocumented")]
-    
-    hyp = _make_hyp("direct", "high", citations)
+def test_temporal_never_upgrades_low() -> None:
+    """If the LLM proposes 'low' for temporal, it should NOT be upgraded to 'medium'."""
+    lines = [_make_line(1, "WARN", "Something odd happened")]
+    citations = [Citation(line_id=1, snippet="odd")]
+    hyp = _make_hyp("temporal", "low", citations)
     response = LLMResponse(status="ok", hypotheses=[hyp])
 
     result = apply_rules(response, lines)
     final_hyp = result.hypotheses[0]  # type: ignore
 
-    # It should be downgraded to temporal, and confidence capped
     assert final_hyp.evidence_type == "temporal"
-    assert final_hyp.confidence == "medium"
+    assert final_hyp.confidence == "low"
 
 
-def test_direct_claim_on_info_line_becomes_temporal() -> None:
-    """A direct claim citing only INFO lines is downgraded."""
-    # 'OOMKilled' is in the catalog, but this is just an INFO line
-    lines = [
-        _make_line(1, "INFO", "Container OOMKilled with exit code 137"),
-    ]
+def test_direct_confidence_unchanged() -> None:
+    """Direct evidence keeps the LLM's exact confidence level."""
+    lines = [_make_line(1, "ERROR", "Container OOMKilled")]
     citations = [Citation(line_id=1, snippet="OOMKilled")]
     
-    hyp = _make_hyp("direct", "high", citations)
-    response = LLMResponse(status="ok", hypotheses=[hyp])
+    # Test all three levels
+    for level in ["high", "medium", "low"]:
+        hyp = _make_hyp("direct", level, citations)
+        response = LLMResponse(status="ok", hypotheses=[hyp])
 
-    result = apply_rules(response, lines)
-    final_hyp = result.hypotheses[0]  # type: ignore
+        result = apply_rules(response, lines)
+        final_hyp = result.hypotheses[0]  # type: ignore
 
-    assert final_hyp.evidence_type == "temporal"
-    assert final_hyp.confidence == "medium"
+        assert final_hyp.evidence_type == "direct"
+        assert final_hyp.confidence == level
