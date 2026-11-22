@@ -25,11 +25,7 @@ def _matches_catalog(text: str) -> bool:
 
 
 def _is_direct_evidence(hypothesis: Hypothesis, lines: list[LogLine]) -> bool:
-    """Check if the hypothesis is backed by a valid direct-cause citation.
-    
-    A hypothesis qualifies as "direct" only if at least one of its cited
-    lines is WARN/ERROR/FATAL AND contains a keyword from the catalog.
-    """
+    """Check if the hypothesis is backed by a valid direct-cause citation."""
     if not hypothesis.citations:
         return False
 
@@ -51,13 +47,22 @@ def _is_direct_evidence(hypothesis: Hypothesis, lines: list[LogLine]) -> bool:
     return False
 
 
-def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
-    """Apply rules to downgrade evidence and cap confidence.
-    
-    - Code accepts "direct" only if verified against the catalog.
-    - Unverified "direct" claims become "temporal".
-    - All "temporal" claims are capped at "medium" confidence.
+def cap_confidence(evidence_type: str, model_confidence: str) -> str:
+    """Cap confidence based on evidence type (LT-26).
+
+    Code can only downgrade, never upgrade.
+    Temporal evidence is capped at 'medium'.
+    Direct evidence keeps the LLM's level.
     """
+    if evidence_type == "temporal":
+        if model_confidence == "high":
+            return "medium"
+        return model_confidence
+    return model_confidence
+
+
+def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
+    """Apply rules to downgrade evidence and cap confidence."""
     hypotheses = response.hypotheses or []
     
     for hyp in hypotheses:
@@ -66,10 +71,8 @@ def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
                 # The LLM lied or was mistaken; downgrade it
                 hyp.evidence_type = "temporal"
                 
-        if hyp.evidence_type == "temporal":
-            # Temporal evidence can never be "high" confidence
-            if hyp.confidence == "high":
-                hyp.confidence = "medium"
+        # Enforce confidence cap based on (possibly updated) evidence type
+        hyp.confidence = cap_confidence(hyp.evidence_type, hyp.confidence)
 
     return FinalSummary(
         status=response.status,
