@@ -1,5 +1,7 @@
 """Tests for evidence typing and confidence capping (LT-25 & LT-26)."""
 
+from datetime import datetime, timedelta
+
 from logtldr.models import Citation, Hypothesis, LLMResponse, LogLine
 from logtldr.rules_engine import apply_rules
 
@@ -116,3 +118,48 @@ def test_direct_confidence_unchanged() -> None:
 
         assert final_hyp.evidence_type == "direct"
         assert final_hyp.confidence == level
+
+
+def test_unknowns_time_window() -> None:
+    """Short time window on service logs should generate an unknown."""
+    now = datetime.now()
+    # 2 minutes apart
+    lines = [
+        _make_line(1, "INFO", "start").model_copy(update={"timestamp": now, "source_format": "plaintext"}),
+        _make_line(2, "ERROR", "fail").model_copy(update={"timestamp": now + timedelta(minutes=2), "source_format": "plaintext"}),
+    ]
+    response = LLMResponse(status="ok", hypotheses=[])
+    
+    result = apply_rules(response, lines)
+    assert any("logs cover only 2 minutes" in u for u in result.unknowns)
+
+
+def test_unknowns_external_dep() -> None:
+    """External dependency keywords should generate unknowns."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "start").model_copy(update={"timestamp": now, "source_format": "plaintext"}),
+        _make_line(2, "ERROR", "connection refused to db").model_copy(update={"timestamp": now + timedelta(minutes=10), "source_format": "plaintext"}),
+    ]
+    citations = [Citation(line_id=2, snippet="connection refused")]
+    hyp = _make_hyp("temporal", "medium", citations)
+    hyp.cause = "Database connection timeout"
+    response = LLMResponse(status="ok", hypotheses=[hyp])
+    
+    result = apply_rules(response, lines)
+    assert any("external dependency" in u for u in result.unknowns)
+    assert any("only one service" in u for u in result.unknowns)
+
+
+def test_time_window_skips_ci() -> None:
+    """The short time window rule should not fire on CI logs (e.g. pytest)."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "start").model_copy(update={"timestamp": now, "source_format": "pytest"}),
+        _make_line(2, "ERROR", "fail").model_copy(update={"timestamp": now + timedelta(minutes=2), "source_format": "pytest"}),
+    ]
+    response = LLMResponse(status="ok", hypotheses=[])
+    
+    result = apply_rules(response, lines)
+    # Should be empty because the time window rule is skipped for CI
+    assert not any("logs cover only" in u for u in result.unknowns)
