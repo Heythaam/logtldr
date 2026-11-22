@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 
 from logtldr.config import Config
@@ -20,18 +21,16 @@ def test_local_rejects_non_localhost() -> None:
         LLMGateway(config)
 
 
-def test_local_accepts_localhost() -> None:
-    """local=True with api_base='http://localhost:11434' succeeds."""
+@patch("httpx.get", side_effect=httpx.ConnectError("refused"))
+def test_local_accepts_localhost(mock_get: MagicMock) -> None:
+    """local=True with api_base='http://localhost:11434' passes URL validation
+    but raises when Ollama is unreachable."""
     config = Config(
         model="ollama/mistral",
         api_base="http://localhost:11434",
-        local=True
+        local=True,
     )
-    # We don't mock Ollama here, we just need to ensure the URL validation 
-    # passes before it attempts the Ollama connection.
     with pytest.raises(ValueError, match="Ollama not running"):
-        # It will raise this because we don't have Ollama running in the test env,
-        # but the URL check passed successfully.
         LLMGateway(config)
 
 

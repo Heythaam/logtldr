@@ -7,13 +7,12 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import litellm
 import yaml
 
 from logtldr.anomaly_detector import detect_anomalies
 from logtldr.citation_validator import validate_citations
 from logtldr.compressed_view import build_compressed_view
-from logtldr.config import Config
+from logtldr.config import VIEW_BUDGET_CLOUD, VIEW_BUDGET_LOCAL, Config
 from logtldr.drain_wrapper import template_logs
 from logtldr.ingest import ingest
 from logtldr.llm_gateway import LLMGateway
@@ -27,16 +26,21 @@ from logtldr.rules_engine import apply_rules
 sys.path.insert(0, str(Path(__file__).parent))
 from scorer import ExpectedOutcome, score_run  # noqa: E402
 
-litellm.drop_params = True
-
 ROOT = Path(__file__).resolve().parents[1]
 CASES_DIR = ROOT / "eval" / "cases"
 RESULTS_DIR = ROOT / "eval" / "results"
 
-# Token budget for compressed view.  Groq free tier has 8000 TPM;
-# system prompt is ~930 tokens, so 5000 leaves room for the reply.
-# Other providers can handle more, but 5000 is a safe universal default.
-VIEW_TOKEN_BUDGET = int(os.environ.get("LOGTLDR_VIEW_BUDGET", "5000"))
+# Token budget for compressed view — auto-detected from model prefix.
+# Local models (ollama/) use 3000 to stay responsive on consumer hardware;
+# cloud APIs use 5000.  Override with LOGTLDR_VIEW_BUDGET env var.
+_BUDGET_OVERRIDE = os.environ.get("LOGTLDR_VIEW_BUDGET")
+
+
+def _resolve_view_budget(model: str) -> int:
+    """Pick token budget: env var wins, then auto-detect from model prefix."""
+    if _BUDGET_OVERRIDE is not None:
+        return int(_BUDGET_OVERRIDE)
+    return VIEW_BUDGET_LOCAL if model.startswith("ollama/") else VIEW_BUDGET_CLOUD
 
 # Seconds to sleep between LLM calls (rate-limit cooldown).
 # Groq free tier needs ~65s; Gemini/OpenAI can use 1-5s; local needs 0.
@@ -55,7 +59,6 @@ def _resolve_api_key() -> str | None:
         or os.environ.get("GEMINI_API_KEY")
         or os.environ.get("OPENAI_API_KEY")
         or os.environ.get("ANTHROPIC_API_KEY")
-        or os.environ.get("OPENROUTER_API_KEY")
     )
 
 
@@ -83,7 +86,8 @@ def run_pipeline(log_path: Path) -> tuple[FinalSummary, list, bool]:
     config = Config(model=model, api_base=api_base, local=is_local, api_key=api_key)
     gateway = LLMGateway(config)
 
-    view = build_compressed_view(redacted, templates, anomalies, max_tokens=VIEW_TOKEN_BUDGET)
+    budget = _resolve_view_budget(model)
+    view = build_compressed_view(redacted, templates, anomalies, max_tokens=budget)
     llm_response = gateway.call_summarize(view, LLMResponse)
     assert isinstance(llm_response, LLMResponse)
 
@@ -100,7 +104,8 @@ def main() -> None:
     cases = sorted([d for d in CASES_DIR.iterdir() if d.is_dir()])
 
     model = os.environ.get("LOGTLDR_MODEL", "groq/openai/gpt-oss-20b")
-    print(f"Model: {model}  |  Sleep: {SLEEP_SECONDS}s  |  Token budget: {VIEW_TOKEN_BUDGET}")
+    budget = _resolve_view_budget(model)
+    print(f"Model: {model}  |  Sleep: {SLEEP_SECONDS}s  |  Token budget: {budget}")
     print()
 
     for i, case_dir in enumerate(cases):
