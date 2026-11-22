@@ -1,0 +1,8 @@
+status: "ok"
+cause: "checkout-svc repeatedly killed by liveness probe failure (HTTP 500), restarted twice"
+cause_keywords: ["liveness", "probe"]
+cause_type: "direct"
+evidence_line_ids: [135, 136, 137, 138, 142, 143, 144, 145]
+expected_format: "plaintext"
+expected_unknowns:
+  - "what causes the checkout-svc /healthz endpoint to return 500 (deadlock, dependency failure, bug) requires application-level logs"

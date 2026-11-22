@@ -19,9 +19,9 @@ def _load_gt(case_dir: Path) -> dict[str, Any]:
     return loaded
 
 
-def test_ten_cases_exist() -> None:
+def test_cases_exist() -> None:
     dirs = _case_dirs()
-    assert len(dirs) == 10, f"expected 10 cases, got {len(dirs)}"
+    assert len(dirs) == 20, f"expected 20 cases, got {len(dirs)}"
     for i, d in enumerate(dirs, start=1):
         assert d.name.startswith(f"{i:02d}_"), f"expected prefix {i:02d}_, got {d.name}"
 

@@ -1,0 +1,287 @@
+2024-03-15T10:00:29Z node-3 kubelet  I0315 10:00:29.486 1234 kubelet.go:1890] SyncLoop (PLEG): event for pod "logging-fluentd-9b7c5d8f4-n3m2"
+2024-03-15T10:00:24Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-3 renewed leadership
+2024-03-15T10:01:31Z kube-system  Normal   Started    pod/kube-proxy-vv7pg  Started container kube-proxy
+2024-03-15T10:02:38Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T10:03:31Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T10:04:26Z kube-system  Normal   Scheduled  pod/metrics-server-7e792  Successfully assigned kube-system/metrics-server-7e792 to node-1
+2024-03-15T10:05:05Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T10:05:04Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T10:06:47Z default      Normal   Pulled     pod/user-svc-4c8d7f6b3-m1k9p  Container image "myregistry.io/user-svc:v4.2.0" already present on machine
+2024-03-15T10:07:56Z node-3 kubelet  I0315 10:07:56.675 9012 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 46%
+2024-03-15T10:08:17Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T10:09:21Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T10:10:55Z node-2 kubelet  I0315 10:10:55.642 1234 kubelet_pods.go:906] Pod "monitoring-grafana-7d8f9c5b4-x2k1" is healthy
+2024-03-15T10:10:32Z node-2 kubelet  I0315 10:10:32.410 5678 prober.go:120] Readiness probe succeeded for container nginx in pod ingress-nginx-controller-5f7b8-k2l9
+2024-03-15T10:11:59Z kube-system  Normal   Scheduled  pod/metrics-server-3ff0d  Successfully assigned kube-system/metrics-server-3ff0d to node-2
+2024-03-15T10:12:06Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-3 renewed leadership
+2024-03-15T10:13:09Z default      Normal   Scheduled  pod/order-svc-8b6d9f7c5-p3k2n  Successfully assigned default/order-svc-8b6d9f7c5-p3k2n to node-3
+2024-03-15T10:14:43Z node-1 kubelet  I0315 10:14:43.184 5678 status_manager.go:220] Status updated for pod "api-gateway-7b4d8f9c5-zt2w1"
+2024-03-15T10:15:20Z node-2 kubelet  I0315 10:15:20.319 5678 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "cache-redis-0"
+2024-03-15T10:15:45Z node-2 kubelet  I0315 10:15:45.574 1234 prober.go:120] Readiness probe succeeded for container worker in pod worker-deploy-6c9f4d8b7-m3k9p
+2024-03-15T10:16:19Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-1 renewed leadership
+2024-03-15T10:17:14Z default      Normal   Scheduled  pod/worker-deploy-6c9f4d8b7-m3k9p  Successfully assigned default/worker-deploy-6c9f4d8b7-m3k9p to node-2
+2024-03-15T10:18:41Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-3 renewed leadership
+2024-03-15T10:19:42Z node-1 kubelet  I0315 10:19:42.414 9012 prober.go:120] Readiness probe succeeded for container order-svc in pod order-svc-8b6d9f7c5-p3k2n
+2024-03-15T10:20:13Z default      Normal   Started    pod/cache-redis-0  Started container redis
+2024-03-15T10:20:21Z node-3 kubelet  I0315 10:20:21.115 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T10:21:00Z node-2 kubelet  I0315 10:21:00.190 3456 kubelet_pods.go:906] Pod "frontend-5f7b8d9c4-k2l9p" is healthy
+2024-03-15T10:22:50Z kube-system  Normal   Started    pod/calico-node-i4p2g  Started container calico-node
+2024-03-15T10:23:56Z node-3 kubelet  I0315 10:23:56.478 9012 kubelet_pods.go:906] Pod "logging-fluentd-9b7c5d8f4-n3m2" is healthy
+2024-03-15T10:24:45Z kube-system  Normal   Started    pod/calico-node-c6seu  Started container calico-node
+2024-03-15T10:25:46Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-2 renewed leadership
+2024-03-15T10:26:10Z node-3 kubelet  I0315 10:26:10.669 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "monitoring-grafana-7d8f9c5b4-x2k1"
+2024-03-15T10:26:32Z node-2 kubelet  I0315 10:26:32.276 9012 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T10:27:34Z node-1 kubelet  I0315 10:27:34.238 5678 kubelet_pods.go:906] Pod "user-svc-4c8d7f6b3-m1k9p" is healthy
+2024-03-15T10:28:36Z node-3 kubelet  I0315 10:28:36.817 1234 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T10:29:31Z default      Normal   Pulled     pod/worker-deploy-6c9f4d8b7-m3k9p  Container image "myregistry.io/worker:v1.8.0" already present on machine
+2024-03-15T10:30:22Z node-2 kubelet  I0315 10:30:22.948 3456 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T10:31:30Z kube-system  Normal   Started    pod/kube-proxy-i8tjw  Started container kube-proxy
+2024-03-15T10:31:10Z node-1 kubelet  I0315 10:31:10.920 5678 kubelet_pods.go:906] Pod "frontend-5f7b8d9c4-k2l9p" is healthy
+2024-03-15T10:32:24Z node-3 kubelet  I0315 10:32:24.256 1234 prober.go:120] Liveness probe succeeded for container grafana in pod monitoring-grafana-7d8f9c5b4-x2k1
+2024-03-15T10:33:43Z kube-system  Normal   Started    pod/kube-proxy-ege5e  Started container kube-proxy
+2024-03-15T10:34:09Z kube-system  Normal   Scheduled  pod/metrics-server-c7f45  Successfully assigned kube-system/metrics-server-c7f45 to node-3
+2024-03-15T10:35:34Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T10:36:46Z kube-system  Normal   Started    pod/kube-proxy-33ic4  Started container kube-proxy
+2024-03-15T10:36:31Z default      Normal   Started    pod/api-gateway-7b4d8f9c5-zt2w1  Started container api-gateway
+2024-03-15T10:37:46Z default      Normal   Scheduled  pod/user-svc-4c8d7f6b3-m1k9p  Successfully assigned default/user-svc-4c8d7f6b3-m1k9p to node-2
+2024-03-15T10:38:08Z node-2 kubelet  I0315 10:38:08.451 9012 kubelet.go:1890] SyncLoop (PLEG): event for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T10:39:38Z node-3 kubelet  I0315 10:39:38.905 9012 kubelet_pods.go:906] Pod "cache-redis-0" is healthy
+2024-03-15T10:40:17Z node-1 kubelet  I0315 10:40:17.225 9012 status_manager.go:220] Status updated for pod "monitoring-grafana-7d8f9c5b4-x2k1"
+2024-03-15T10:41:13Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T10:41:58Z node-2 kubelet  I0315 10:41:58.223 1234 status_manager.go:220] Status updated for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T10:42:51Z node-1 kubelet  I0315 10:42:51.373 3456 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T10:43:14Z node-3 kubelet  I0315 10:43:14.563 5678 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T10:44:52Z node-1 kubelet  I0315 10:44:52.649 1234 kubelet_pods.go:906] Pod "logging-fluentd-9b7c5d8f4-n3m2" is healthy
+2024-03-15T10:45:11Z default      Normal   Scheduled  pod/logging-fluentd-9b7c5d8f4-n3m2  Successfully assigned default/logging-fluentd-9b7c5d8f4-n3m2 to node-1
+2024-03-15T10:46:10Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-2 renewed leadership
+2024-03-15T10:46:22Z node-3 kubelet  I0315 10:46:22.730 9012 kubelet_pods.go:906] Pod "cache-redis-0" is healthy
+2024-03-15T10:47:00Z kube-system  Normal   Started    pod/kube-proxy-ips8q  Started container kube-proxy
+2024-03-15T10:48:58Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-3 renewed leadership
+2024-03-15T10:49:25Z node-3 kubelet  I0315 10:49:25.760 5678 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "cache-redis-0"
+2024-03-15T10:50:49Z default      Normal   Started    pod/logging-fluentd-9b7c5d8f4-n3m2  Started container fluentd
+2024-03-15T10:51:48Z node-2 kubelet  I0315 10:51:48.359 5678 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T10:52:24Z node-3 kubelet  I0315 10:52:24.316 9012 status_manager.go:220] Status updated for pod "cache-redis-0"
+2024-03-15T10:52:43Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T10:53:11Z default      Normal   Started    pod/api-gateway-7b4d8f9c5-zt2w1  Started container api-gateway
+2024-03-15T10:54:51Z node-2 kubelet  I0315 10:54:51.477 1234 status_manager.go:220] Status updated for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T10:55:37Z node-2 kubelet  I0315 10:55:37.561 3456 prober.go:120] Readiness probe succeeded for container redis in pod cache-redis-0
+2024-03-15T10:56:06Z node-1 kubelet  I0315 10:56:06.253 9012 kubelet_pods.go:906] Pod "frontend-5f7b8d9c4-k2l9p" is healthy
+2024-03-15T10:57:30Z node-2 kubelet  I0315 10:57:30.268 3456 prober.go:120] Readiness probe succeeded for container frontend in pod frontend-5f7b8d9c4-k2l9p
+2024-03-15T10:57:34Z node-2 kubelet  I0315 10:57:34.764 3456 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T10:58:21Z kube-system  Normal   Started    pod/kube-proxy-am3jk  Started container kube-proxy
+2024-03-15T10:59:51Z kube-system  Normal   Started    pod/kube-proxy-1rkqq  Started container kube-proxy
+2024-03-15T11:00:56Z node-2 kubelet  I0315 11:00:56.935 5678 kubelet.go:1890] SyncLoop (PLEG): event for pod "monitoring-grafana-7d8f9c5b4-x2k1"
+2024-03-15T11:01:17Z node-2 kubelet  I0315 11:01:17.731 5678 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T11:02:11Z default      Normal   Pulled     pod/cache-redis-0  Container image "myregistry.io/redis:7.2.4" already present on machine
+2024-03-15T11:02:39Z default      Normal   Started    pod/cache-redis-0  Started container redis
+2024-03-15T11:03:39Z node-3 kubelet  I0315 11:03:39.683 5678 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "monitoring-grafana-7d8f9c5b4-x2k1"
+2024-03-15T11:04:10Z node-3 kubelet  I0315 11:04:10.148 9012 kubelet_pods.go:906] Pod "user-svc-4c8d7f6b3-m1k9p" is healthy
+2024-03-15T11:05:06Z node-3 kubelet  I0315 11:05:06.206 1234 prober.go:120] Liveness probe succeeded for container worker in pod worker-deploy-6c9f4d8b7-m3k9p
+2024-03-15T11:06:23Z default      Normal   Scheduled  pod/logging-fluentd-9b7c5d8f4-n3m2  Successfully assigned default/logging-fluentd-9b7c5d8f4-n3m2 to node-1
+2024-03-15T11:07:09Z default      Normal   Pulled     pod/frontend-5f7b8d9c4-k2l9p  Container image "myregistry.io/frontend:v3.1.0" already present on machine
+2024-03-15T11:07:35Z node-1 kubelet  I0315 11:07:35.687 5678 volume_manager.go:400] All volumes are attached and mounted for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T11:08:18Z node-1 kubelet  I0315 11:08:18.948 3456 status_manager.go:220] Status updated for pod "user-svc-4c8d7f6b3-m1k9p"
+2024-03-15T11:09:45Z node-3 kubelet  I0315 11:09:45.616 3456 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T11:10:09Z node-1 kubelet  I0315 11:10:09.548 9012 kubelet.go:1890] SyncLoop (PLEG): event for pod "logging-fluentd-9b7c5d8f4-n3m2"
+2024-03-15T11:11:52Z kube-system  Normal   Started    pod/calico-node-he9wi  Started container calico-node
+2024-03-15T11:12:01Z node-1 kubelet  I0315 11:12:01.510 1234 kubelet_pods.go:906] Pod "cache-redis-0" is healthy
+2024-03-15T11:13:59Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-1 renewed leadership
+2024-03-15T11:13:58Z node-2 kubelet  I0315 11:13:58.888 9012 prober.go:120] Liveness probe succeeded for container nginx in pod ingress-nginx-controller-5f7b8-k2l9
+2024-03-15T11:14:05Z node-2 kubelet  I0315 11:14:05.267 5678 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T11:15:41Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T11:16:50Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T11:17:15Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T11:18:44Z kube-system  Normal   Started    pod/calico-node-ry27v  Started container calico-node
+2024-03-15T11:18:06Z node-1 kubelet  I0315 11:18:06.811 9012 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T11:19:29Z node-2 kubelet  I0315 11:19:29.121 9012 status_manager.go:220] Status updated for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T11:20:44Z kube-system  Normal   Started    pod/calico-node-rv7aq  Started container calico-node
+2024-03-15T11:21:00Z default      Normal   Pulled     pod/monitoring-grafana-7d8f9c5b4-x2k1  Container image "myregistry.io/grafana:10.3.1" already present on machine
+2024-03-15T11:22:26Z node-2 kubelet  I0315 11:22:26.289 3456 prober.go:120] Liveness probe succeeded for container order-svc in pod order-svc-8b6d9f7c5-p3k2n
+2024-03-15T11:23:01Z default      Normal   Pulled     pod/worker-deploy-6c9f4d8b7-m3k9p  Container image "myregistry.io/worker:v1.8.0" already present on machine
+2024-03-15T11:23:15Z node-1 kubelet  I0315 11:23:15.761 3456 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T11:24:21Z node-1 kubelet  I0315 11:24:21.309 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "user-svc-4c8d7f6b3-m1k9p"
+2024-03-15T11:25:06Z node-3 kubelet  I0315 11:25:06.481 9012 status_manager.go:220] Status updated for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T11:26:33Z default      Normal   Scheduled  pod/order-svc-8b6d9f7c5-p3k2n  Successfully assigned default/order-svc-8b6d9f7c5-p3k2n to node-2
+2024-03-15T11:27:30Z node-3 kubelet  I0315 11:27:30.633 9012 prober.go:120] Liveness probe succeeded for container redis in pod cache-redis-0
+2024-03-15T11:28:07Z node-1 kubelet  I0315 11:28:07.832 3456 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T11:28:32Z node-3 kubelet  I0315 11:28:32.192 3456 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T11:29:47Z kube-system  Normal   Started    pod/calico-node-a70tg  Started container calico-node
+2024-03-15T11:30:12Z node-2 kubelet  I0315 11:30:12.429 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "api-gateway-7b4d8f9c5-zt2w1"
+2024-03-15T11:31:42Z node-2 kubelet  I0315 11:31:42.161 3456 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T11:32:39Z default      Normal   Started    pod/user-svc-4c8d7f6b3-m1k9p  Started container user-svc
+2024-03-15T11:33:15Z node-1 kubelet  I0315 11:33:15.412 1234 volume_manager.go:400] All volumes are attached and mounted for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T11:33:22Z node-3 kubelet  I0315 11:33:22.854 1234 status_manager.go:220] Status updated for pod "logging-fluentd-9b7c5d8f4-n3m2"
+2024-03-15T11:34:52Z node-3 kubelet  I0315 11:34:52.106 1234 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T11:35:37Z kube-system  Normal   Started    pod/calico-node-fon8o  Started container calico-node
+2024-03-15T11:36:48Z node-1 kubelet  I0315 11:36:48.688 1234 status_manager.go:220] Status updated for pod "cache-redis-0"
+2024-03-15T11:37:48Z node-2 kubelet  I0315 11:37:48.239 1234 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T11:38:00Z kube-system  Normal   Started    pod/calico-node-8gvsk  Started container calico-node
+2024-03-15T11:39:29Z node-3 kubelet  I0315 11:39:29.959 3456 prober.go:120] Liveness probe succeeded for container order-svc in pod order-svc-8b6d9f7c5-p3k2n
+2024-03-15T11:39:00Z node-1 kubelet  I0315 11:39:00.778 3456 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T11:40:01Z kube-system  Normal   Started    pod/calico-node-gxbry  Started container calico-node
+2024-03-15T11:41:35Z node-3 kubelet  I0315 11:41:35.368 1234 prober.go:120] Liveness probe succeeded for container fluentd in pod logging-fluentd-9b7c5d8f4-n3m2
+2024-03-15T11:42:48Z default      Normal   Started    pod/frontend-5f7b8d9c4-k2l9p  Started container frontend
+2024-03-15T11:43:27Z node-3 kubelet  I0315 11:43:27.614 3456 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T11:44:03Z node-2 kubelet  I0315 11:44:03.402 9012 prober.go:120] Liveness probe succeeded for container order-svc in pod order-svc-8b6d9f7c5-p3k2n
+2024-03-15T11:44:02Z default      Normal   Started    pod/worker-deploy-6c9f4d8b7-m3k9p  Started container worker
+2024-03-15T11:45:21Z node-2 kubelet  I0315 11:45:21.750 9012 prober.go:120] Liveness probe succeeded for container user-svc in pod user-svc-4c8d7f6b3-m1k9p
+2024-03-15T11:46:06Z node-1 kubelet  I0315 11:46:06.330 9012 prober.go:120] Liveness probe succeeded for container nginx in pod ingress-nginx-controller-5f7b8-k2l9
+2024-03-15T11:47:25Z node-3 kubelet  I0315 11:47:25.193 1234 kubelet_pods.go:906] Pod "worker-deploy-6c9f4d8b7-m3k9p" is healthy
+2024-03-15T11:48:35Z default      Normal   Scheduled  pod/cache-redis-0  Successfully assigned default/cache-redis-0 to node-1
+2024-03-15T11:49:28Z node-3 kubelet  I0315 11:49:28.444 1234 kubelet.go:1890] SyncLoop (PLEG): event for pod "api-gateway-7b4d8f9c5-zt2w1"
+2024-03-15T11:49:19Z node-1 kubelet  I0315 11:49:19.849 9012 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T11:50:21Z node-1 kubelet  I0315 11:50:21.622 1234 prober.go:120] Liveness probe succeeded for container fluentd in pod logging-fluentd-9b7c5d8f4-n3m2
+2024-03-15T11:51:32Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T11:52:44Z kube-system  Normal   Started    pod/kube-proxy-udprk  Started container kube-proxy
+2024-03-15T11:53:31Z node-1 kubelet  I0315 11:53:31.553 3456 kubelet.go:1890] SyncLoop (PLEG): event for pod "logging-fluentd-9b7c5d8f4-n3m2"
+2024-03-15T11:54:16Z default      Normal   Scheduled  pod/api-gateway-7b4d8f9c5-zt2w1  Successfully assigned default/api-gateway-7b4d8f9c5-zt2w1 to node-3
+2024-03-15T11:54:45Z node-3 kubelet  I0315 11:54:45.708 3456 kubelet.go:1890] SyncLoop (PLEG): event for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T11:55:37Z default      Normal   Pulled     pod/logging-fluentd-9b7c5d8f4-n3m2  Container image "myregistry.io/fluentd:v1.9.0" already present on machine
+2024-03-15T11:56:46Z kube-system  Normal   Started    pod/calico-node-q71t6  Started container calico-node
+2024-03-15T11:57:59Z default      Normal   Scheduled  pod/frontend-5f7b8d9c4-k2l9p  Successfully assigned default/frontend-5f7b8d9c4-k2l9p to node-1
+2024-03-15T11:58:48Z node-3 kubelet  I0315 11:58:48.216 1234 volume_manager.go:400] All volumes are attached and mounted for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T11:59:53Z node-2 kubelet  I0315 11:59:53.579 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "logging-fluentd-9b7c5d8f4-n3m2"
+2024-03-15T12:00:01Z kube-system  Normal   Started    pod/coredns-5d78c9869d-4xk2j  Started container coredns
+2024-03-15T12:00:02Z kube-system  Normal   Started    pod/coredns-5d78c9869d-7wm3r  Started container coredns
+2024-03-15T12:00:05Z default      Normal   Started    pod/order-svc-8b6d9f7c5-p3k2n  Started container order-svc
+2024-03-15T12:00:06Z default      Normal   Started    pod/user-svc-4c8d7f6b3-m1k9p  Started container user-svc
+2024-03-15T12:00:10Z kube-system  Warning  Unhealthy  pod/coredns-5d78c9869d-4xk2j  Readiness probe failed: HTTP probe failed with statuscode: 503
+2024-03-15T12:00:11Z kube-system  Warning  Unhealthy  pod/coredns-5d78c9869d-7wm3r  Readiness probe failed: HTTP probe failed with statuscode: 503
+2024-03-15T12:00:12Z kube-system  Warning  BackOff    pod/coredns-5d78c9869d-4xk2j  Back-off restarting failed container coredns
+2024-03-15T12:00:13Z kube-system  Warning  Failed     pod/coredns-5d78c9869d-4xk2j  Error: container coredns exited with code 1: plugin/forward: no nameservers found
+2024-03-15T12:00:14Z kube-system  Warning  BackOff    pod/coredns-5d78c9869d-7wm3r  Back-off restarting failed container coredns
+2024-03-15T12:00:15Z kube-system  Warning  Failed     pod/coredns-5d78c9869d-7wm3r  Error: container coredns exited with code 1: plugin/forward: no nameservers found
+2024-03-15T12:00:20Z default      Warning  DNSError   pod/order-svc-8b6d9f7c5-p3k2n  Failed to resolve 'user-svc.default.svc.cluster.local': dial udp 10.96.0.10:53: i/o timeout
+2024-03-15T12:00:21Z default      Warning  DNSError   pod/order-svc-8b6d9f7c5-p3k2n  Failed to resolve 'postgres-primary.default.svc.cluster.local': dial udp 10.96.0.10:53: i/o timeout
+2024-03-15T12:00:25Z default      Warning  DNSError   pod/user-svc-4c8d7f6b3-m1k9p  Failed to resolve 'postgres-primary.default.svc.cluster.local': dial udp 10.96.0.10:53: i/o timeout
+2024-03-15T12:00:30Z default      Warning  Unhealthy  pod/order-svc-8b6d9f7c5-p3k2n  Readiness probe failed: HTTP probe failed with statuscode: 503
+2024-03-15T12:00:31Z default      Warning  Unhealthy  pod/user-svc-4c8d7f6b3-m1k9p  Readiness probe failed: HTTP probe failed with statuscode: 503
+2024-03-15T12:00:40Z kube-system  Normal   Pulled     pod/coredns-5d78c9869d-4xk2j  Container image "registry.k8s.io/coredns/coredns:v1.11.1" already present on machine
+2024-03-15T12:00:41Z kube-system  Normal   Started    pod/coredns-5d78c9869d-4xk2j  Started container coredns
+2024-03-15T12:01:00Z default      Normal   Scheduled  pod/frontend-5f7b8d9c4-k2l9p  Successfully assigned default/frontend-5f7b8d9c4-k2l9p to node-2
+2024-03-15T12:03:48Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-3 renewed leadership
+2024-03-15T12:03:54Z node-3 kubelet  I0315 12:03:54.414 5678 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:03:02Z kube-system  Normal   Started    pod/kube-proxy-2th1f  Started container kube-proxy
+2024-03-15T12:04:05Z node-3 kubelet  I0315 12:04:05.621 3456 prober.go:120] Readiness probe succeeded for container redis in pod cache-redis-0
+2024-03-15T12:04:23Z kube-system  Normal   Started    pod/kube-proxy-gm5dk  Started container kube-proxy
+2024-03-15T12:05:43Z node-3 kubelet  I0315 12:05:43.775 5678 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:05:18Z node-2 kubelet  I0315 12:05:18.184 3456 status_manager.go:220] Status updated for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T12:06:34Z kube-system  Normal   Started    pod/kube-proxy-e9afp  Started container kube-proxy
+2024-03-15T12:06:08Z node-3 kubelet  I0315 12:06:08.369 9012 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 55%
+2024-03-15T12:07:16Z node-1 kubelet  I0315 12:07:16.683 5678 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:07:34Z node-1 kubelet  I0315 12:07:34.966 3456 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:08:49Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-3 renewed leadership
+2024-03-15T12:08:18Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T12:09:08Z default      Normal   Started    pod/worker-deploy-6c9f4d8b7-m3k9p  Started container worker
+2024-03-15T12:09:00Z kube-system  Normal   Scheduled  pod/metrics-server-5135b  Successfully assigned kube-system/metrics-server-5135b to node-1
+2024-03-15T12:10:03Z node-1 kubelet  I0315 12:10:03.831 9012 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:10:55Z node-1 kubelet  I0315 12:10:55.309 5678 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:11:06Z kube-system  Normal   Started    pod/calico-node-fozg7  Started container calico-node
+2024-03-15T12:11:49Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T12:12:01Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T12:12:05Z node-3 kubelet  I0315 12:12:05.653 3456 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "user-svc-4c8d7f6b3-m1k9p"
+2024-03-15T12:13:47Z node-3 kubelet  I0315 12:13:47.607 1234 volume_manager.go:400] All volumes are attached and mounted for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T12:13:18Z node-1 kubelet  I0315 12:13:18.469 5678 kubelet_pods.go:906] Pod "worker-deploy-6c9f4d8b7-m3k9p" is healthy
+2024-03-15T12:13:19Z node-3 kubelet  I0315 12:13:19.284 3456 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:14:46Z kube-system  Normal   Started    pod/calico-node-bdud8  Started container calico-node
+2024-03-15T12:14:37Z node-3 kubelet  I0315 12:14:37.924 3456 kubelet.go:1890] SyncLoop (PLEG): event for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T12:15:43Z node-2 kubelet  I0315 12:15:43.319 3456 volume_manager.go:400] All volumes are attached and mounted for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T12:15:36Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T12:16:53Z node-3 kubelet  I0315 12:16:53.335 9012 prober.go:120] Readiness probe succeeded for container redis in pod cache-redis-0
+2024-03-15T12:16:45Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-1 renewed leadership
+2024-03-15T12:17:35Z node-3 kubelet  I0315 12:17:35.354 9012 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 37%
+2024-03-15T12:17:25Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-2 renewed leadership
+2024-03-15T12:18:47Z node-3 kubelet  I0315 12:18:47.497 1234 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:18:03Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-1 renewed leadership
+2024-03-15T12:19:44Z kube-system  Normal   Scheduled  pod/metrics-server-9e9de  Successfully assigned kube-system/metrics-server-9e9de to node-3
+2024-03-15T12:19:26Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-3 renewed leadership
+2024-03-15T12:20:51Z node-1 kubelet  I0315 12:20:51.193 5678 kubelet_pods.go:906] Pod "ingress-nginx-controller-5f7b8-k2l9" is healthy
+2024-03-15T12:20:31Z kube-system  Normal   Scheduled  pod/metrics-server-6f90c  Successfully assigned kube-system/metrics-server-6f90c to node-1
+2024-03-15T12:21:49Z kube-system  Normal   Started    pod/calico-node-9max6  Started container calico-node
+2024-03-15T12:21:56Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T12:22:12Z node-1 kubelet  I0315 12:22:12.170 9012 kubelet_pods.go:906] Pod "monitoring-grafana-7d8f9c5b4-x2k1" is healthy
+2024-03-15T12:22:19Z default      Normal   Started    pod/api-gateway-7b4d8f9c5-zt2w1  Started container api-gateway
+2024-03-15T12:23:23Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T12:23:52Z node-1 kubelet  I0315 12:23:52.503 3456 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:23:56Z node-3 kubelet  I0315 12:23:56.552 9012 volume_manager.go:400] All volumes are attached and mounted for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T12:24:32Z node-1 kubelet  I0315 12:24:32.408 5678 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:24:21Z node-1 kubelet  I0315 12:24:21.719 9012 volume_manager.go:400] All volumes are attached and mounted for pod "order-svc-8b6d9f7c5-p3k2n"
+2024-03-15T12:25:49Z node-3 kubelet  I0315 12:25:49.663 1234 prober.go:120] Readiness probe succeeded for container nginx in pod ingress-nginx-controller-5f7b8-k2l9
+2024-03-15T12:25:46Z node-3 kubelet  I0315 12:25:46.629 9012 kubelet.go:1890] SyncLoop (PLEG): event for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T12:26:52Z default      Normal   Pulled     pod/order-svc-8b6d9f7c5-p3k2n  Container image "myregistry.io/order-svc:v1.5.3" already present on machine
+2024-03-15T12:26:09Z node-1 kubelet  I0315 12:26:09.494 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "ingress-nginx-controller-5f7b8-k2l9"
+2024-03-15T12:27:02Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-1 renewed leadership
+2024-03-15T12:27:56Z node-3 kubelet  I0315 12:27:56.800 1234 kubelet_pods.go:906] Pod "cache-redis-0" is healthy
+2024-03-15T12:28:28Z default      Normal   Scheduled  pod/user-svc-4c8d7f6b3-m1k9p  Successfully assigned default/user-svc-4c8d7f6b3-m1k9p to node-3
+2024-03-15T12:28:45Z node-1 kubelet  I0315 12:28:45.214 3456 prober.go:120] Liveness probe succeeded for container fluentd in pod logging-fluentd-9b7c5d8f4-n3m2
+2024-03-15T12:29:16Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T12:29:23Z default      Normal   Pulled     pod/logging-fluentd-9b7c5d8f4-n3m2  Container image "myregistry.io/fluentd:v1.9.0" already present on machine
+2024-03-15T12:30:50Z default      Normal   Started    pod/monitoring-grafana-7d8f9c5b4-x2k1  Started container grafana
+2024-03-15T12:30:44Z node-3 kubelet  I0315 12:30:44.429 1234 kubelet_pods.go:906] Pod "frontend-5f7b8d9c4-k2l9p" is healthy
+2024-03-15T12:31:49Z kube-system  Normal   Scheduled  pod/metrics-server-5b2dc  Successfully assigned kube-system/metrics-server-5b2dc to node-3
+2024-03-15T12:31:47Z node-2 kubelet  I0315 12:31:47.933 1234 volume_manager.go:400] All volumes are attached and mounted for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T12:32:45Z node-1 kubelet  I0315 12:32:45.783 9012 prober.go:120] Liveness probe succeeded for container user-svc in pod user-svc-4c8d7f6b3-m1k9p
+2024-03-15T12:32:52Z node-2 kubelet  I0315 12:32:52.976 1234 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:33:08Z node-3 kubelet  I0315 12:33:08.883 3456 prober.go:120] Liveness probe succeeded for container redis in pod cache-redis-0
+2024-03-15T12:33:18Z kube-system  Normal   Started    pod/kube-proxy-ah3qn  Started container kube-proxy
+2024-03-15T12:33:48Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T12:34:32Z default      Normal   Scheduled  pod/logging-fluentd-9b7c5d8f4-n3m2  Successfully assigned default/logging-fluentd-9b7c5d8f4-n3m2 to node-2
+2024-03-15T12:34:02Z node-1 kubelet  I0315 12:34:02.538 9012 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:35:30Z node-1 kubelet  I0315 12:35:30.466 5678 volume_manager.go:400] All volumes are attached and mounted for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T12:35:37Z node-2 kubelet  I0315 12:35:37.158 9012 prober.go:120] Liveness probe succeeded for container worker in pod worker-deploy-6c9f4d8b7-m3k9p
+2024-03-15T12:36:38Z node-2 kubelet  I0315 12:36:38.363 1234 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:36:54Z node-1 kubelet  I0315 12:36:54.347 9012 kubelet.go:1890] SyncLoop (PLEG): event for pod "api-gateway-7b4d8f9c5-zt2w1"
+2024-03-15T12:37:06Z node-2 kubelet  I0315 12:37:06.955 3456 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T12:37:17Z kube-system  Normal   Started    pod/calico-node-v3g60  Started container calico-node
+2024-03-15T12:38:00Z node-2 kubelet  I0315 12:38:00.288 3456 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "order-svc-8b6d9f7c5-p3k2n"
+2024-03-15T12:38:59Z node-2 kubelet  I0315 12:38:59.897 1234 prober.go:120] Readiness probe succeeded for container fluentd in pod logging-fluentd-9b7c5d8f4-n3m2
+2024-03-15T12:39:55Z node-2 kubelet  I0315 12:39:55.676 9012 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:39:39Z node-3 kubelet  I0315 12:39:39.432 1234 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:40:14Z default      Normal   Pulled     pod/api-gateway-7b4d8f9c5-zt2w1  Container image "myregistry.io/api-gateway:v2.3.1" already present on machine
+2024-03-15T12:40:16Z node-3 kubelet  I0315 12:40:16.123 3456 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:41:00Z node-1 kubelet  I0315 12:41:00.709 1234 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T12:41:11Z node-1 kubelet  I0315 12:41:11.297 5678 status_manager.go:220] Status updated for pod "cache-redis-0"
+2024-03-15T12:42:21Z kube-system  Normal   Started    pod/kube-proxy-2w1i5  Started container kube-proxy
+2024-03-15T12:42:54Z node-1 kubelet  I0315 12:42:54.267 3456 prober.go:120] Liveness probe succeeded for container grafana in pod monitoring-grafana-7d8f9c5b4-x2k1
+2024-03-15T12:43:10Z node-3 kubelet  I0315 12:43:10.554 9012 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:43:37Z default      Normal   Pulled     pod/order-svc-8b6d9f7c5-p3k2n  Container image "myregistry.io/order-svc:v1.5.3" already present on machine
+2024-03-15T12:43:28Z node-2 kubelet  I0315 12:43:28.202 3456 kubelet.go:1890] SyncLoop (PLEG): event for pod "user-svc-4c8d7f6b3-m1k9p"
+2024-03-15T12:44:57Z node-1 kubelet  I0315 12:44:57.735 3456 kubelet_pods.go:906] Pod "api-gateway-7b4d8f9c5-zt2w1" is healthy
+2024-03-15T12:44:10Z node-2 kubelet  I0315 12:44:10.462 5678 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T12:45:31Z node-2 kubelet  I0315 12:45:31.753 5678 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:45:44Z kube-system  Normal   Started    pod/calico-node-rnu85  Started container calico-node
+2024-03-15T12:46:37Z node-1 kubelet  I0315 12:46:37.540 9012 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:46:50Z default      Normal   Pulled     pod/ingress-nginx-controller-5f7b8-k2l9  Container image "myregistry.io/nginx:1.25.3" already present on machine
+2024-03-15T12:47:42Z node-1 kubelet  I0315 12:47:42.471 9012 cpu_manager.go:200] [cpu_manager] Reconciling CPU assignments
+2024-03-15T12:47:34Z node-1 kubelet  I0315 12:47:34.846 3456 status_manager.go:220] Status updated for pod "cache-redis-0"
+2024-03-15T12:48:15Z kube-system  Normal   Scheduled  pod/metrics-server-aa50c  Successfully assigned kube-system/metrics-server-aa50c to node-3
+2024-03-15T12:48:52Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T12:49:34Z node-2 kubelet  I0315 12:49:34.237 5678 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:49:20Z default      Normal   Started    pod/order-svc-8b6d9f7c5-p3k2n  Started container order-svc
+2024-03-15T12:50:14Z node-2 kubelet  I0315 12:50:14.304 9012 kubelet_node_status.go:70] Setting node condition Ready to True
+2024-03-15T12:50:18Z node-1 kubelet  I0315 12:50:18.406 5678 kubelet.go:1890] SyncLoop (PLEG): event for pod "monitoring-grafana-7d8f9c5b4-x2k1"
+2024-03-15T12:51:30Z node-2 kubelet  I0315 12:51:30.532 5678 volume_manager.go:400] All volumes are attached and mounted for pod "api-gateway-7b4d8f9c5-zt2w1"
+2024-03-15T12:51:05Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T12:52:50Z node-3 kubelet  I0315 12:52:50.943 3456 prober.go:120] Readiness probe succeeded for container nginx in pod ingress-nginx-controller-5f7b8-k2l9
+2024-03-15T12:52:36Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-1 renewed leadership
+2024-03-15T12:53:30Z kube-system  Normal   Scheduled  pod/metrics-server-ef3a6  Successfully assigned kube-system/metrics-server-ef3a6 to node-3
+2024-03-15T12:53:31Z node-2 kubelet  I0315 12:53:31.400 5678 volume_manager.go:400] All volumes are attached and mounted for pod "frontend-5f7b8d9c4-k2l9p"
+2024-03-15T12:53:56Z node-1 kubelet  I0315 12:53:56.524 3456 volume_manager.go:400] All volumes are attached and mounted for pod "order-svc-8b6d9f7c5-p3k2n"
+2024-03-15T12:54:52Z node-2 kubelet  I0315 12:54:52.161 5678 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 31%
+2024-03-15T12:54:18Z node-1 kubelet  I0315 12:54:18.521 3456 prober.go:120] Liveness probe succeeded for container redis in pod cache-redis-0
+2024-03-15T12:55:01Z default      Normal   Started    pod/logging-fluentd-9b7c5d8f4-n3m2  Started container fluentd
+2024-03-15T12:55:32Z node-3 kubelet  I0315 12:55:32.436 5678 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 62%
+2024-03-15T12:56:48Z kube-system  Normal   Sync       daemonset/kube-proxy  Daemon set kube-proxy synced successfully
+2024-03-15T12:56:34Z default      Normal   Started    pod/logging-fluentd-9b7c5d8f4-n3m2  Started container fluentd
+2024-03-15T12:57:49Z node-2 kubelet  I0315 12:57:49.789 5678 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 64%
+2024-03-15T12:57:27Z kube-system  Normal   Started    pod/kube-proxy-x9d18  Started container kube-proxy
+2024-03-15T12:58:43Z node-2 kubelet  I0315 12:58:43.215 9012 eviction_manager.go:166] eviction manager: pods are within resource limits
+2024-03-15T12:58:38Z node-3 kubelet  I0315 12:58:38.378 5678 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 64%
+2024-03-15T12:59:07Z node-2 kubelet  I0315 12:59:07.614 1234 volume_manager.go:400] All volumes are attached and mounted for pod "logging-fluentd-9b7c5d8f4-n3m2"
+2024-03-15T12:59:24Z kube-system  Normal   Scheduled  pod/metrics-server-a96ba  Successfully assigned kube-system/metrics-server-a96ba to node-2
+2024-03-15T13:00:01Z node-2 kubelet  I0315 13:00:01.132 1234 image_gc_manager.go:304] [imageGCManager] Disk usage on image filesystem is 31%
+2024-03-15T13:00:42Z kube-system  Normal   LeaderElection  lease/kube-controller-manager  node-3 renewed leadership
+2024-03-15T13:01:54Z node-2 kubelet  I0315 13:01:54.919 3456 kubelet.go:1890] SyncLoop (RECONCILE): event for pod "worker-deploy-6c9f4d8b7-m3k9p"
+2024-03-15T13:01:12Z kube-system  Normal   Scheduled  pod/metrics-server-6044f  Successfully assigned kube-system/metrics-server-6044f to node-2
+2024-03-15T13:02:51Z node-1 kubelet  I0315 13:02:51.266 9012 kubelet_pods.go:906] Pod "order-svc-8b6d9f7c5-p3k2n" is healthy
+2024-03-15T13:02:52Z kube-system  Normal   LeaderElection  lease/kube-scheduler  node-3 renewed leadership
