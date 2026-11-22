@@ -7,7 +7,12 @@ from typing import NoReturn, Optional
 from logtldr.anomaly_detector import detect_anomalies
 from logtldr.citation_validator import validate_citations
 from logtldr.compressed_view import build_compressed_view
-from logtldr.config import Config
+from logtldr.config import (
+    DEFAULT_LOCAL_MODEL,
+    VIEW_BUDGET_CLOUD,
+    VIEW_BUDGET_LOCAL,
+    Config,
+)
 from logtldr.drain_wrapper import template_logs
 from logtldr.ingest import ingest
 from logtldr.llm_gateway import LLMGateway
@@ -30,7 +35,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("source", nargs="?", metavar="FILE", help="Log file. Omit for stdin.")
     parser.add_argument("--local", action="store_true", help="Restrict LLM to localhost.")
     parser.add_argument("--json", action="store_true", dest="as_json", help="Emit JSON.")
-    parser.add_argument("--model", default="gpt-4o-mini", metavar="NAME", help="LLM model.")
+    parser.add_argument(
+        "--model", default=None, metavar="NAME",
+        help=f"LLM model (default: {DEFAULT_LOCAL_MODEL} with --local, gpt-4o-mini otherwise).",
+    )
     parser.add_argument("--yes", action="store_true", help="Skip confirmation.")
     return parser
 
@@ -77,9 +85,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         )
     else:
         # 7. COMPRESS → PROMPT → LLM GATEWAY
-        api_base = "http://localhost:11434" if args.local else None
-        config = Config(model=args.model, api_base=api_base, local=args.local)
-        compressed_view = build_compressed_view(redacted_lines, templates, anomalies)
+        # Resolve model: --local without --model → baseline local model
+        is_local = args.local or bool(args.model and args.model.startswith("ollama/"))
+        model = args.model or (DEFAULT_LOCAL_MODEL if is_local else "gpt-4o-mini")
+        api_base = "http://localhost:11434" if is_local else "https://api.openai.com/v1"
+        config = Config(model=model, api_base=api_base, local=is_local)
+
+        # Token budget: local models get a smaller budget so they stay
+        # responsive on consumer hardware.
+        view_budget = VIEW_BUDGET_LOCAL if is_local else VIEW_BUDGET_CLOUD
+        compressed_view = build_compressed_view(
+            redacted_lines, templates, anomalies, max_tokens=view_budget,
+        )
 
         try:
             gateway = LLMGateway(config)
