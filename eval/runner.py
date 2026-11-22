@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+import litellm
 import yaml
 
 from logtldr.anomaly_detector import detect_anomalies
@@ -26,14 +27,36 @@ from logtldr.rules_engine import apply_rules
 sys.path.insert(0, str(Path(__file__).parent))
 from scorer import ExpectedOutcome, score_run  # noqa: E402
 
+litellm.drop_params = True
+
 ROOT = Path(__file__).resolve().parents[1]
 CASES_DIR = ROOT / "eval" / "cases"
 RESULTS_DIR = ROOT / "eval" / "results"
 
-# Groq free tier has 8000 TPM.  System prompt is ~930 tokens, so the
-# view must stay well below 7000 to leave room for the reply.
-VIEW_TOKEN_BUDGET = 5000
-GROQ_SLEEP_SECONDS = 65  # full TPM window reset
+# Token budget for compressed view.  Groq free tier has 8000 TPM;
+# system prompt is ~930 tokens, so 5000 leaves room for the reply.
+# Other providers can handle more, but 5000 is a safe universal default.
+VIEW_TOKEN_BUDGET = int(os.environ.get("LOGTLDR_VIEW_BUDGET", "5000"))
+
+# Seconds to sleep between LLM calls (rate-limit cooldown).
+# Groq free tier needs ~65s; Gemini/OpenAI can use 1-5s; local needs 0.
+SLEEP_SECONDS = int(os.environ.get("LOGTLDR_EVAL_SLEEP", "65"))
+
+
+def _resolve_api_key() -> str | None:
+    """Read API key from environment, provider-agnostic.
+
+    Priority: LOGTLDR_API_KEY > provider-specific vars.
+    Returns None if nothing is set (LiteLLM will try its own env detection).
+    """
+    return (
+        os.environ.get("LOGTLDR_API_KEY")
+        or os.environ.get("GROQ_API_KEY")
+        or os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+        or os.environ.get("ANTHROPIC_API_KEY")
+        or os.environ.get("OPENROUTER_API_KEY")
+    )
 
 
 def run_pipeline(log_path: Path) -> tuple[FinalSummary, list, bool]:
@@ -52,10 +75,10 @@ def run_pipeline(log_path: Path) -> tuple[FinalSummary, list, bool]:
         return FinalSummary(status=gate_status, verdict="Refused by gate"), redacted, False
 
     # Configure LLM via environment variables
-    api_key = os.environ.get("GROQ_API_KEY")
-    is_local = False
-    api_base = None  # let LiteLLM route by prefix
+    api_key = _resolve_api_key()
     model = os.environ.get("LOGTLDR_MODEL", "groq/openai/gpt-oss-20b")
+    is_local = model.startswith("ollama/")
+    api_base = None  # let LiteLLM route by prefix
 
     config = Config(model=model, api_base=api_base, local=is_local, api_key=api_key)
     gateway = LLMGateway(config)
@@ -75,6 +98,10 @@ def main() -> None:
 
     cases_to_score = []
     cases = sorted([d for d in CASES_DIR.iterdir() if d.is_dir()])
+
+    model = os.environ.get("LOGTLDR_MODEL", "groq/openai/gpt-oss-20b")
+    print(f"Model: {model}  |  Sleep: {SLEEP_SECONDS}s  |  Token budget: {VIEW_TOKEN_BUDGET}")
+    print()
 
     for i, case_dir in enumerate(cases):
         log_path = case_dir / "input.log"
@@ -97,17 +124,17 @@ def main() -> None:
             summary, redacted_lines, used_llm = run_pipeline(log_path)
             cases_to_score.append((expected, summary, redacted_lines))
 
-            # Print cause for debugging keyword matches
+            # Print cause for debugging
             print(f"  status: {summary.status}")
             if summary.hypotheses:
                 print(f"  cause: {summary.hypotheses[0].cause}")
             else:
                 print("  cause: (no hypotheses)")
 
-            # Sleep between LLM calls to respect Groq free-tier TPM limit
-            if used_llm and i < len(cases) - 1:
-                print(f"  Sleeping {GROQ_SLEEP_SECONDS}s (rate limit)...")
-                time.sleep(GROQ_SLEEP_SECONDS)
+            # Sleep between LLM calls to respect rate limits
+            if used_llm and i < len(cases) - 1 and SLEEP_SECONDS > 0:
+                print(f"  Sleeping {SLEEP_SECONDS}s (rate limit)...")
+                time.sleep(SLEEP_SECONDS)
         except Exception as e:
             print(f"  [ERROR] Pipeline failed: {e}")
             # Create a dummy summary just so the case is recorded as a failure
@@ -134,6 +161,7 @@ def main() -> None:
 
     # Print summary to console
     print("\n--- EVAL SUMMARY ---")
+    print(f"Model: {model}")
     print(f"Accuracy: {report.accuracy * 100:.1f}%")
     print(f"Diagnosis: {report.diagnosis_correct}/{report.diagnosis_total}")
     print(f"Healthy: {report.healthy_correct}/{report.healthy_total} (False Positives: {report.false_positives})")
