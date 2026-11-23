@@ -134,5 +134,46 @@ def render_terminal(summary: FinalSummary) -> str:
 
 
 def render_json(summary: FinalSummary) -> str:
-    """Render the final summary as a JSON string."""
-    return summary.model_dump_json()
+    """Render the full JSON output (LT-32).
+
+    Includes: status, verdict (formatted), all hypotheses, timeline
+    (sorted chronologically), unknowns, and check_next.
+    Output is valid JSON parseable by ``python -m json.tool``.
+    """
+    import json
+
+    output: dict = {
+        "status": summary.status,
+        "verdict": format_verdict(summary),
+    }
+
+    # All hypotheses (not just top)
+    if summary.hypotheses:
+        output["hypotheses"] = [
+            {
+                "cause": h.cause,
+                "evidence_type": h.evidence_type,
+                "confidence": h.confidence,
+                "citations": [
+                    {"line_id": c.line_id, "snippet": c.snippet}
+                    for c in h.citations
+                ],
+            }
+            for h in summary.hypotheses
+        ]
+    else:
+        output["hypotheses"] = []
+
+    # Timeline (sorted)
+    if summary.timeline:
+        output["timeline"] = _sort_timeline_events(summary.timeline)
+    else:
+        output["timeline"] = []
+
+    # Unknowns
+    output["unknowns"] = summary.unknowns or []
+
+    # Check next
+    output["check_next"] = summary.check_next
+
+    return json.dumps(output, indent=2)

@@ -1,7 +1,14 @@
-"""Tests for the renderer (LT-29, LT-30, LT-31)."""
+"""Tests for the renderer (LT-29, LT-30, LT-31, LT-32)."""
+
+import json
 
 from logtldr.models import Citation, FinalSummary, Hypothesis
-from logtldr.renderer import format_timeline, format_verdict, render_terminal
+from logtldr.renderer import (
+    format_timeline,
+    format_verdict,
+    render_json,
+    render_terminal,
+)
 
 
 def _make_summary(cause: str, confidence: str = "high", status: str = "ok") -> FinalSummary:
@@ -234,3 +241,108 @@ def test_terminal_long_line_truncated() -> None:
 
     for line in output.split("\n"):
         assert len(line) <= 80, f"line too wide ({len(line)} chars): {line!r}"
+
+
+# ── LT-32 JSON renderer tests ────────────────────────────────────────
+
+
+def test_json_output() -> None:
+    """JSON output is valid, contains all fields, parseable by json.tool."""
+    summary = FinalSummary(
+        status="ok",
+        hypotheses=[
+            Hypothesis(
+                cause="disk full on /var/log",
+                evidence_type="direct",
+                confidence="high",
+                citations=[
+                    Citation(line_id=5, snippet="WARN disk usage 90%"),
+                    Citation(line_id=45, snippet="FATAL disk full"),
+                ],
+            ),
+            Hypothesis(
+                cause="log rotation misconfigured",
+                evidence_type="temporal",
+                confidence="medium",
+                citations=[
+                    Citation(line_id=12, snippet="WARN logrotate skipped"),
+                ],
+            ),
+        ],
+        timeline=[
+            {
+                "time": "2024-01-15T10:00:05Z",
+                "event": "disk warning",
+                "citations": [{"line_id": 5, "snippet": "WARN disk usage 90%"}],
+            },
+            {
+                "time": "2024-01-15T10:00:45Z",
+                "event": "crash",
+                "citations": [{"line_id": 45, "snippet": "FATAL disk full"}],
+            },
+        ],
+        unknowns=["only one node's logs present"],
+        check_next="Check /var/log partition",
+    )
+
+    raw = render_json(summary)
+
+    # Must be valid JSON
+    data = json.loads(raw)
+
+    # All top-level keys present
+    assert data["status"] == "ok"
+    assert "Evidence points to" in data["verdict"]
+    assert len(data["hypotheses"]) == 2
+    assert len(data["timeline"]) == 2
+    assert data["unknowns"] == ["only one node's logs present"]
+    assert data["check_next"] == "Check /var/log partition"
+
+    # First hypothesis has citations
+    h0 = data["hypotheses"][0]
+    assert h0["cause"] == "disk full on /var/log"
+    assert h0["evidence_type"] == "direct"
+    assert h0["confidence"] == "high"
+    assert len(h0["citations"]) == 2
+    assert h0["citations"][0]["line_id"] == 5
+
+    # Second hypothesis
+    h1 = data["hypotheses"][1]
+    assert h1["cause"] == "log rotation misconfigured"
+    assert h1["confidence"] == "medium"
+
+
+def test_json_healthy() -> None:
+    """Healthy JSON has empty hypotheses and timeline."""
+    summary = FinalSummary(status="nothing_unusual")
+
+    data = json.loads(render_json(summary))
+
+    assert data["status"] == "nothing_unusual"
+    assert data["hypotheses"] == []
+    assert data["timeline"] == []
+    assert data["unknowns"] == []
+    assert data["check_next"] is None
+
+
+def test_json_roundtrip() -> None:
+    """JSON output survives json.loads → json.dumps without loss."""
+    summary = FinalSummary(
+        status="ok",
+        hypotheses=[
+            Hypothesis(
+                cause="OOM killed",
+                evidence_type="direct",
+                confidence="high",
+                citations=[Citation(line_id=99, snippet="OOM killer invoked")],
+            ),
+        ],
+        unknowns=["peer logs missing"],
+    )
+
+    raw = render_json(summary)
+    data = json.loads(raw)
+    re_encoded = json.dumps(data, indent=2)
+    data2 = json.loads(re_encoded)
+
+    assert data == data2
