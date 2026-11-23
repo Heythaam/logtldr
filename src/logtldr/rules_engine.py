@@ -1,5 +1,6 @@
 """Rules engine (AD-5)."""
 
+import re
 from datetime import timedelta
 from importlib.resources import files
 
@@ -18,6 +19,20 @@ except Exception:
 _CI_FORMATS = ("pytest", "npm", "json")
 # Keywords indicating an external dependency issue
 _EXTERNAL_KEYWORDS = ("timeout", "connection refused", "unreachable", "external", "upstream", "dependency")
+
+
+# Deploy/startup marker patterns (LT-33)
+_DEPLOY_MARKERS = [
+    re.compile(r"starting\s+v?(\d+\.\d+[\.\d]*)", re.I),
+    re.compile(r"deployed\s+v?(\d+\.\d+[\.\d]*)", re.I),
+    re.compile(r"version\s+v?(\d+\.\d+[\.\d]*)\s+(started|deployed|rolling)", re.I),
+    re.compile(r"release\s+v?(\d+\.\d+[\.\d]*)", re.I),
+    re.compile(r"config\s+reloaded", re.I),
+    re.compile(r"initialized\s+successfully", re.I),
+    re.compile(r"server\s+started", re.I),
+    re.compile(r"application\s+started", re.I),
+    re.compile(r"rolling\s+update.*v?(\d+\.\d+[\.\d]*)", re.I),
+]
 
 def _matches_catalog(text: str) -> bool:
     """Check if the text contains any keyword from the catalog."""
@@ -117,6 +132,13 @@ def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
 
     unknowns = _generate_unknowns(lines, hypotheses)
 
+    # Deploy/startup marker detection (LT-33)
+    deploy_marker = detect_deploy_marker(lines)
+    if deploy_marker:
+        timing_note = _deploy_timing_note(deploy_marker, lines)
+        if timing_note:
+            unknowns.insert(0, timing_note)
+
     return FinalSummary(
         status=response.status,
         verdict=response.verdict,
@@ -125,3 +147,44 @@ def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
         unknowns=unknowns,
         check_next=response.check_next,
     )
+
+def detect_deploy_marker(lines: list[LogLine]) -> dict | None:
+    """Find the latest deploy/startup marker and return its metadata (LT-33)."""
+    for line in lines:
+        text = line.message or line.original_text
+        for pat in _DEPLOY_MARKERS:
+            m = pat.search(text)
+            if m:
+                version = m.group(1) if m.lastindex else None
+                label = f"v{version}" if version else "deploy/restart"
+                return {
+                    "line_id": line.line_id,
+                    "label": label,
+                    "timestamp": line.timestamp,
+                }
+    return None
+
+
+def _deploy_timing_note(marker: dict, lines: list[LogLine]) -> str | None:
+    """Generate a timing note like 'Errors started 40s after v2.3.1 started.' (LT-33)."""
+    marker_ts = marker.get("timestamp")
+    if not marker_ts:
+        return None
+
+    # Find first ERROR/FATAL after the marker
+    for line in lines:
+        if line.line_id <= marker["line_id"]:
+            continue
+        if line.level in ("ERROR", "FATAL") and line.timestamp:
+            delta = line.timestamp - marker_ts
+            secs = int(delta.total_seconds())
+            if secs < 0:
+                continue
+            if secs < 60:
+                time_str = f"{secs}s"
+            elif secs < 3600:
+                time_str = f"{secs // 60}m{secs % 60}s"
+            else:
+                time_str = f"{secs // 3600}h{(secs % 3600) // 60}m"
+            return f"Errors started {time_str} after {marker['label']} started."
+    return None

@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 
 from logtldr.models import Citation, Hypothesis, LLMResponse, LogLine
-from logtldr.rules_engine import apply_rules
+from logtldr.rules_engine import apply_rules, detect_deploy_marker
 
 
 def _make_line(line_id: int, level: str, msg: str) -> LogLine:
@@ -163,3 +163,42 @@ def test_time_window_skips_ci() -> None:
     result = apply_rules(response, lines)
     # Should be empty because the time window rule is skipped for CI
     assert not any("logs cover only" in u for u in result.unknowns)
+
+def test_deploy_marker_version() -> None:
+    """Detects a versioned deploy marker and generates timing note (LT-33)."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "starting v2.3.1").model_copy(
+            update={"timestamp": now, "source_format": "plaintext"}
+        ),
+        _make_line(2, "INFO", "healthcheck ok").model_copy(
+            update={"timestamp": now + timedelta(seconds=20), "source_format": "plaintext"}
+        ),
+        _make_line(3, "ERROR", "connection pool exhausted").model_copy(
+            update={"timestamp": now + timedelta(seconds=40), "source_format": "plaintext"}
+        ),
+    ]
+    response = LLMResponse(status="ok", hypotheses=[])
+
+    result = apply_rules(response, lines)
+    assert any("40s after v2.3.1 started" in u for u in result.unknowns)
+
+
+def test_deploy_marker_startup() -> None:
+    """Detects a non-versioned startup marker (LT-33)."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "config reloaded").model_copy(
+            update={"timestamp": now, "source_format": "plaintext"}
+        ),
+        _make_line(2, "ERROR", "null pointer exception").model_copy(
+            update={"timestamp": now + timedelta(seconds=15), "source_format": "plaintext"}
+        ),
+    ]
+
+    marker = detect_deploy_marker(lines)
+    assert marker is not None
+    assert marker["label"] == "deploy/restart"
+
+    result = apply_rules(LLMResponse(status="ok", hypotheses=[]), lines)
+    assert any("15s after deploy/restart started" in u for u in result.unknowns)
