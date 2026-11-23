@@ -1,5 +1,6 @@
 """Rules engine (AD-5)."""
 
+import re
 from datetime import timedelta
 from importlib.resources import files
 
@@ -18,6 +19,20 @@ except Exception:
 _CI_FORMATS = ("pytest", "npm", "json")
 # Keywords indicating an external dependency issue
 _EXTERNAL_KEYWORDS = ("timeout", "connection refused", "unreachable", "external", "upstream", "dependency")
+
+# Generic advice patterns that add no value (LT-34)
+_GENERIC_ADVICE_PATTERNS = [
+    re.compile(r"^check (the )?(network|logs?|service|system|config(uration)?)\b", re.I),
+    re.compile(r"^restart (the )?(service|server|pod|container|node|process)\b", re.I),
+    re.compile(r"^investigate (further|more|the issue)\b", re.I),
+    re.compile(r"^monitor (the )?(system|service|logs?|metrics?)\b", re.I),
+    re.compile(r"^review (the )?(logs?|config(uration)?|settings?)\b", re.I),
+    re.compile(r"^contact (support|admin|the team)\b", re.I),
+    re.compile(r"^try (again|restarting|rebooting)\b", re.I),
+    re.compile(r"^look (at|into) (the )?(logs?|error|issue)\b", re.I),
+    re.compile(r"^ensure (the )?(service|system|config)", re.I),
+    re.compile(r"^verify (the )?(service|system|config|network)", re.I),
+]
 
 def _matches_catalog(text: str) -> bool:
     """Check if the text contains any keyword from the catalog."""
@@ -117,11 +132,23 @@ def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
 
     unknowns = _generate_unknowns(lines, hypotheses)
 
+
+    check_next = response.check_next
+    if is_generic_advice(check_next):
+        check_next = None
+
     return FinalSummary(
         status=response.status,
         verdict=response.verdict,
         hypotheses=hypotheses,
         timeline=response.timeline,
         unknowns=unknowns,
-        check_next=response.check_next,
+        check_next=check_next,
     )
+
+def is_generic_advice(text: str | None) -> bool:
+    """Return True if check_next text matches a known generic pattern (LT-34)."""
+    if not text:
+        return False
+    text = text.strip()
+    return any(pat.search(text) for pat in _GENERIC_ADVICE_PATTERNS)
