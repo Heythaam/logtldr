@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 
 from logtldr.models import Citation, Hypothesis, LLMResponse, LogLine
-from logtldr.rules_engine import apply_rules
+from logtldr.rules_engine import apply_rules, is_generic_advice
 
 
 def _make_line(line_id: int, level: str, msg: str) -> LogLine:
@@ -163,3 +163,63 @@ def test_time_window_skips_ci() -> None:
     result = apply_rules(response, lines)
     # Should be empty because the time window rule is skipped for CI
     assert not any("logs cover only" in u for u in result.unknowns)
+
+def test_generic_advice_flagged() -> None:
+    """Generic check_next patterns are detected and suppressed (LT-34)."""
+    # These should be flagged as generic
+    generic = [
+        "Check the network",
+        "Restart the service",
+        "Investigate further",
+        "Monitor the system",
+        "Review the logs",
+        "Contact support",
+        "Try restarting",
+        "Look into the error",
+        "Check logs",
+        "Verify the network",
+    ]
+    for advice in generic:
+        assert is_generic_advice(advice), f"Should be generic: {advice!r}"
+
+    # These should NOT be flagged — they're specific
+    specific = [
+        "Check /var/log/mysql/error.log for replication lag after the failover at 10:03",
+        "Run `kubectl describe pod auth-svc-7f8b` to see why the liveness probe failed",
+        "Compare heap dumps before and after the 10:12 GC pause",
+        "Verify the intermediate CA cert (CN=DigiCert SHA2) is in the trust chain",
+        None,
+        "",
+    ]
+    for advice in specific:
+        assert not is_generic_advice(advice), f"Should NOT be generic: {advice!r}"
+
+
+def test_generic_advice_suppressed_in_apply_rules() -> None:
+    """apply_rules sets check_next to None when the LLM gives generic advice."""
+    lines = [_make_line(1, "ERROR", "Something broke")]
+    citations = [Citation(line_id=1, snippet="broke")]
+    hyp = _make_hyp("temporal", "medium", citations)
+    response = LLMResponse(
+        status="ok",
+        hypotheses=[hyp],
+        check_next="Restart the service",
+    )
+
+    result = apply_rules(response, lines)
+    assert result.check_next is None
+
+
+def test_specific_advice_kept_in_apply_rules() -> None:
+    """apply_rules keeps specific check_next advice from the LLM."""
+    lines = [_make_line(1, "ERROR", "Something broke")]
+    citations = [Citation(line_id=1, snippet="broke")]
+    hyp = _make_hyp("temporal", "medium", citations)
+    response = LLMResponse(
+        status="ok",
+        hypotheses=[hyp],
+        check_next="Run `kubectl logs auth-svc` to check for TLS handshake errors",
+    )
+
+    result = apply_rules(response, lines)
+    assert result.check_next == "Run `kubectl logs auth-svc` to check for TLS handshake errors"
