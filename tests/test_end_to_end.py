@@ -58,8 +58,8 @@ def test_skeleton_runs_end_to_end(
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["status"] == "ok"
-    assert "Mocked LLM response" in payload["verdict"]
-    assert payload["hypotheses"][0]["citations"][0]["citation_valid"] is True
+    assert "Mocked cause" in payload["verdict"]
+    assert payload["hypotheses"][0]["citations"][0]["line_id"] == 55
 
 
 @patch("litellm.completion")
