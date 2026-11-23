@@ -1,0 +1,21 @@
+2024-01-15T10:00:00Z INFO deployment/web-frontend: Scaling up replica set web-frontend-7b9d5c to 3
+2024-01-15T10:00:01Z INFO replicaset/web-frontend-7b9d5c: Created pod: web-frontend-7b9d5c-xk2m9
+2024-01-15T10:00:01Z INFO replicaset/web-frontend-7b9d5c: Created pod: web-frontend-7b9d5c-qt4f7
+2024-01-15T10:00:01Z INFO replicaset/web-frontend-7b9d5c: Created pod: web-frontend-7b9d5c-mn8p2
+2024-01-15T10:00:03Z INFO pod/web-frontend-7b9d5c-xk2m9: Pulling image "registry.internal/web-frontend:v2.4.1"
+2024-01-15T10:00:03Z INFO pod/web-frontend-7b9d5c-qt4f7: Pulling image "registry.internal/web-frontend:v2.4.1"
+2024-01-15T10:00:03Z INFO pod/web-frontend-7b9d5c-mn8p2: Pulling image "registry.internal/web-frontend:v2.4.1"
+2024-01-15T10:00:08Z INFO pod/web-frontend-7b9d5c-xk2m9: Successfully pulled image in 4.8s
+2024-01-15T10:00:08Z INFO pod/web-frontend-7b9d5c-qt4f7: Successfully pulled image in 4.9s
+2024-01-15T10:00:09Z INFO pod/web-frontend-7b9d5c-mn8p2: Successfully pulled image in 5.1s
+2024-01-15T10:00:09Z INFO pod/web-frontend-7b9d5c-xk2m9: Started container web-frontend
+2024-01-15T10:00:09Z INFO pod/web-frontend-7b9d5c-qt4f7: Started container web-frontend
+2024-01-15T10:00:10Z INFO pod/web-frontend-7b9d5c-mn8p2: Started container web-frontend
+2024-01-15T10:00:12Z INFO pod/web-frontend-7b9d5c-xk2m9: Readiness probe succeeded
+2024-01-15T10:00:12Z INFO pod/web-frontend-7b9d5c-qt4f7: Readiness probe succeeded
+2024-01-15T10:00:13Z INFO pod/web-frontend-7b9d5c-mn8p2: Readiness probe succeeded
+2024-01-15T10:00:13Z INFO deployment/web-frontend: Scaling down old replica set web-frontend-6a8c4b to 0
+2024-01-15T10:00:14Z INFO replicaset/web-frontend-6a8c4b: Deleted pod: web-frontend-6a8c4b-r3j7k
+2024-01-15T10:00:14Z INFO replicaset/web-frontend-6a8c4b: Deleted pod: web-frontend-6a8c4b-p5t9w
+2024-01-15T10:00:14Z INFO replicaset/web-frontend-6a8c4b: Deleted pod: web-frontend-6a8c4b-v2n8x
+2024-01-15T10:00:15Z INFO deployment/web-frontend: Successfully rolled out revision 14

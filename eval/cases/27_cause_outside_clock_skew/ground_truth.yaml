@@ -1,0 +1,10 @@
+status: "not_enough_signal"
+cause: "Authentication failures caused by clock skew between app server and auth provider"
+cause_keywords: ["clock", "skew", "token", "delta"]
+cause_type: "temporal"
+evidence_line_ids: [4, 5, 8, 9, 12, 13]
+expected_format: "plaintext"
+expected_unknowns:
+  - "NTP configuration and system clock state not visible in application logs"
+  - "whether clock skew is on this server, the auth provider, or both cannot be determined from these logs alone"
+  - "token validation errors correlate with time-sensitive fields but the clock offset magnitude is unknown"

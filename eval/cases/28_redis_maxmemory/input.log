@@ -1,0 +1,13 @@
+2024-01-15T10:00:00Z INFO  [redis] 1234:M 15 Jan 2024 10:00:00.000 * DB loaded from disk: 0.023 seconds
+2024-01-15T10:00:01Z INFO  [redis] 1234:M 15 Jan 2024 10:00:01.000 * Ready to accept connections
+2024-01-15T10:00:30Z INFO  [redis] 1234:M 15 Jan 2024 10:00:30.000 # 10000 changes in 30 seconds. Saving...
+2024-01-15T10:00:31Z INFO  [redis] 1234:M 15 Jan 2024 10:00:31.000 * Background saving started by pid 1235
+2024-01-15T10:01:00Z WARN  [redis] 1234:M 15 Jan 2024 10:01:00.000 # WARNING: maxmemory limit reached (256mb), eviction policy: allkeys-lru
+2024-01-15T10:01:00Z ERROR [redis] 1234:M 15 Jan 2024 10:01:00.001 # OOM command not allowed when used memory > 'maxmemory'
+2024-01-15T10:01:00Z ERROR [redis] 1234:M 15 Jan 2024 10:01:00.002 # Can't save in background: fork: Cannot allocate memory
+2024-01-15T10:01:01Z WARN  [app-svc] Cache miss for session:user:4421, falling back to database
+2024-01-15T10:01:01Z WARN  [app-svc] Cache miss for session:user:7832, falling back to database
+2024-01-15T10:01:02Z ERROR [app-svc] Database connection pool exhausted (max=20), 15 requests waiting
+2024-01-15T10:01:02Z WARN  [app-svc] Cache miss for session:user:1190, falling back to database
+2024-01-15T10:01:03Z ERROR [app-svc] Request timeout path=/api/profile after 10000ms
+2024-01-15T10:01:03Z ERROR [app-svc] Request timeout path=/api/orders after 10000ms

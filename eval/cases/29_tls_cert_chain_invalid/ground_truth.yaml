@@ -1,0 +1,8 @@
+status: "ok"
+cause: "TLS certificate chain is invalid; intermediate CA certificate is missing or expired"
+cause_keywords: ["certificate", "tls", "ssl", "chain", "verify"]
+cause_type: "direct"
+evidence_line_ids: [3, 4, 7, 8]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the cert was recently renewed and the intermediate was not updated, or was never configured correctly, is not in these logs"

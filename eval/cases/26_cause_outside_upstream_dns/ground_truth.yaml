@@ -1,0 +1,10 @@
+status: "not_enough_signal"
+cause: "DNS resolution failures for api.stripe.com; root cause is in DNS infrastructure, not this service"
+cause_keywords: ["dns", "resolution", "SERVFAIL"]
+cause_type: "temporal"
+evidence_line_ids: [3, 5, 7, 9, 11]
+expected_format: "plaintext"
+expected_unknowns:
+  - "DNS server logs not present; whether this is a resolver outage, misconfigured record, or upstream DNS failure is unknown"
+  - "only this service's view of DNS failures is visible; other services may or may not be affected"
+  - "errors point to an external dependency; check DNS resolver and upstream DNS provider separately"

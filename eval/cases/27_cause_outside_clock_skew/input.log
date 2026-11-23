@@ -1,0 +1,14 @@
+2024-01-15T10:00:00Z INFO  [auth-proxy] Received request GET /api/dashboard user=alice
+2024-01-15T10:00:00Z INFO  [auth-proxy] Validating access token for user=alice
+2024-01-15T10:00:00Z INFO  [auth-proxy] Token not-before claim is 2s ahead of server clock
+2024-01-15T10:00:00Z ERROR [auth-proxy] Token validation failed: not yet valid (clock skew detected, delta=2s)
+2024-01-15T10:00:00Z ERROR [auth-proxy] Rejecting request GET /api/dashboard user=alice status=401
+2024-01-15T10:00:03Z INFO  [auth-proxy] Received request GET /api/settings user=bob
+2024-01-15T10:00:03Z INFO  [auth-proxy] Validating access token for user=bob
+2024-01-15T10:00:03Z ERROR [auth-proxy] Token validation failed: not yet valid (clock skew detected, delta=3s)
+2024-01-15T10:00:03Z ERROR [auth-proxy] Rejecting request GET /api/settings user=bob status=401
+2024-01-15T10:00:05Z INFO  [auth-proxy] Received request POST /api/data user=charlie
+2024-01-15T10:00:05Z INFO  [auth-proxy] Validating access token for user=charlie
+2024-01-15T10:00:05Z ERROR [auth-proxy] Token validation failed: not yet valid (clock skew detected, delta=4s)
+2024-01-15T10:00:05Z ERROR [auth-proxy] Rejecting request POST /api/data user=charlie status=401
+2024-01-15T10:00:06Z WARN  [auth-proxy] 3 consecutive auth failures in 6s, possible clock skew detected

@@ -1,0 +1,15 @@
+2024-01-15T10:00:00Z INFO  [http-8080-exec-1] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:01Z INFO  [http-8080-exec-2] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:02Z INFO  [http-8080-exec-3] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:03Z WARN  [GC-thread-1] j.l.Runtime : GC pause: 1.8s (old gen 87% full)
+2024-01-15T10:00:05Z ERROR [http-8080-exec-1] c.a.OrderService : Request timeout after 5000ms path=/api/orders
+2024-01-15T10:00:05Z INFO  [http-8080-exec-4] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:06Z INFO  [http-8080-exec-5] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:07Z WARN  [GC-thread-1] j.l.Runtime : GC pause: 2.3s (old gen 91% full)
+2024-01-15T10:00:09Z ERROR [http-8080-exec-2] c.a.OrderService : Request timeout after 5000ms path=/api/orders
+2024-01-15T10:00:09Z INFO  [http-8080-exec-6] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:10Z INFO  [http-8080-exec-7] c.a.OrderService : Processing order batch size=250
+2024-01-15T10:00:11Z WARN  [GC-thread-1] j.l.Runtime : GC pause: 3.1s (old gen 94% full)
+2024-01-15T10:00:14Z ERROR [http-8080-exec-3] c.a.OrderService : Request timeout after 5000ms path=/api/orders
+2024-01-15T10:00:14Z WARN  [http-8080-exec-4] c.a.OrderService : Response slow: 4200ms path=/api/orders
+2024-01-15T10:00:15Z INFO  [http-8080-exec-8] c.a.OrderService : Processing order batch size=250

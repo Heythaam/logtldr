@@ -1,0 +1,9 @@
+status: "not_enough_signal"
+cause: "Long GC pauses correlate with request failures but are a symptom, not the root cause"
+cause_keywords: ["gc", "pause", "latency"]
+cause_type: "temporal"
+evidence_line_ids: [4, 5, 8, 9, 12, 13]
+expected_format: "plaintext"
+expected_unknowns:
+  - "GC pressure is a symptom; what triggered the heap growth (leak, traffic spike, large payload) is not in these logs"
+  - "only JVM-side logs present; whether the downstream timeouts caused retries that worsened heap usage is unknown"
