@@ -1,0 +1,10 @@
+status: "not_enough_signal"
+cause: "Retry storm amplifies errors but the original failure is in the payment gateway, not shown here"
+cause_keywords: ["retry", "payment", "timeout"]
+cause_type: "temporal"
+evidence_line_ids: [3, 4, 5, 7, 8, 9, 11, 12, 13]
+expected_format: "plaintext"
+expected_unknowns:
+  - "payment gateway logs not present; why it started returning 503s is outside this window"
+  - "retry policy may be misconfigured but the trigger for the first failure is external"
+  - "circuit breaker did not trip; whether that is by design or a bug is not determinable from these logs"

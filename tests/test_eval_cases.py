@@ -1,4 +1,4 @@
-"""Validate eval case structure (LT-15)."""
+"""Validate eval case structure (LT-15, LT-36)."""
 
 from pathlib import Path
 from typing import Any
@@ -21,7 +21,7 @@ def _load_gt(case_dir: Path) -> dict[str, Any]:
 
 def test_cases_exist() -> None:
     dirs = _case_dirs()
-    assert len(dirs) == 20, f"expected 20 cases, got {len(dirs)}"
+    assert len(dirs) == 30, f"expected 30 cases, got {len(dirs)}"
     for i, d in enumerate(dirs, start=1):
         assert d.name.startswith(f"{i:02d}_"), f"expected prefix {i:02d}_, got {d.name}"
 
@@ -47,16 +47,15 @@ def test_ground_truth_fields(case_dir: Path) -> None:
         assert gt["cause_type"] in ("direct", "temporal")
 
 
-def test_at_least_one_healthy_case() -> None:
-    for d in _case_dirs():
-        if _load_gt(d).get("status") == "nothing_unusual":
-            return
-    pytest.fail("no healthy-logs case (status: nothing_unusual)")
+def test_at_least_three_healthy_cases() -> None:
+    count = sum(1 for d in _case_dirs() if _load_gt(d).get("status") == "nothing_unusual")
+    assert count >= 3, f"expected >=3 healthy cases (status: nothing_unusual), got {count}"
 
 
-def test_at_least_one_misleading_case() -> None:
+def test_at_least_three_misleading_cases() -> None:
+    count = 0
     for d in _case_dirs():
         unknowns = _load_gt(d).get("expected_unknowns") or []
         if any(("external" in u.lower()) or ("outside" in u.lower()) for u in unknowns):
-            return
-    pytest.fail("no misleading case (expected_unknowns about external/outside)")
+            count += 1
+    assert count >= 3, f"expected >=3 misleading/cause-outside cases, got {count}"

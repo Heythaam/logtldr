@@ -1,0 +1,12 @@
+2024-01-15T10:00:00Z INFO  [ingress-nginx] Starting NGINX Ingress controller v1.9.4
+2024-01-15T10:00:01Z INFO  [ingress-nginx] SSL certificate for *.example.com loaded from secret default/tls-example
+2024-01-15T10:00:02Z INFO  [ingress-nginx] Received request GET /api/health from 10.0.1.50
+2024-01-15T10:00:02Z ERROR [ingress-nginx] SSL_do_handshake() failed: ssl_error:unable to get local issuer certificate
+2024-01-15T10:00:02Z ERROR [ingress-nginx] peer closed connection in SSL handshake while SSL handshaking to upstream
+2024-01-15T10:00:03Z INFO  [ingress-nginx] Received request GET /api/users from 10.0.1.51
+2024-01-15T10:00:03Z ERROR [ingress-nginx] SSL_do_handshake() failed: ssl_error:certificate verify failed (depth=1: unable to get issuer certificate)
+2024-01-15T10:00:03Z ERROR [ingress-nginx] upstream connection error: ssl handshake failure, server: api.example.com
+2024-01-15T10:00:04Z INFO  [ingress-nginx] Received request GET /api/health from 10.0.1.50
+2024-01-15T10:00:04Z ERROR [ingress-nginx] SSL_do_handshake() failed: ssl_error:unable to get local issuer certificate
+2024-01-15T10:00:05Z WARN  [ingress-nginx] 3 SSL handshake failures in 3s for upstream api-backend:8443
+2024-01-15T10:00:05Z INFO  [ingress-nginx] Health check to api-backend:8443 failed, marking upstream as down
