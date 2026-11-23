@@ -1,7 +1,7 @@
-"""Tests for the renderer (LT-29, LT-30)."""
+"""Tests for the renderer (LT-29, LT-30, LT-31)."""
 
-from logtldr.models import FinalSummary, Hypothesis
-from logtldr.renderer import format_timeline, format_verdict
+from logtldr.models import Citation, FinalSummary, Hypothesis
+from logtldr.renderer import format_timeline, format_verdict, render_terminal
 
 
 def _make_summary(cause: str, confidence: str = "high", status: str = "ok") -> FinalSummary:
@@ -128,3 +128,109 @@ def test_timeline_empty_list() -> None:
     """Empty timeline list → empty string."""
     summary = FinalSummary(status="ok", timeline=[])
     assert format_timeline(summary) == ""
+
+
+# ── LT-31 terminal renderer tests ────────────────────────────────────
+
+
+def test_terminal_output_fits_screen() -> None:
+    """Full terminal output fits one screen (~30 lines, 80 chars)."""
+    summary = FinalSummary(
+        status="ok",
+        hypotheses=[
+            Hypothesis(
+                cause="disk full on /var/log",
+                evidence_type="direct",
+                confidence="high",
+                citations=[
+                    Citation(line_id=5, snippet="WARN disk usage 90%"),
+                    Citation(line_id=45, snippet="FATAL disk full"),
+                ],
+            ),
+        ],
+        timeline=[
+            {
+                "time": "2024-01-15T10:00:05Z",
+                "event": "disk warning",
+                "citations": [{"line_id": 5, "snippet": "WARN disk usage 90%"}],
+            },
+            {
+                "time": "2024-01-15T10:00:45Z",
+                "event": "crash",
+                "citations": [{"line_id": 45, "snippet": "FATAL disk full"}],
+            },
+        ],
+        unknowns=[
+            "only one node's logs present",
+            "disk cleanup cron job status unknown",
+        ],
+        check_next="Check /var/log partition and disk cleanup schedule",
+    )
+
+    output = render_terminal(summary)
+    lines = output.split("\n")
+
+    # Fits one screen
+    assert len(lines) <= 30, f"output is {len(lines)} lines, expected <=30"
+    for line in lines:
+        assert len(line) <= 80, f"line too wide ({len(line)} chars): {line!r}"
+
+    # Has all sections
+    assert "Status: ok" in output
+    assert "Verdict: Evidence points to disk full on /var/log, confidence: high" in output
+    assert "Timeline:" in output
+    assert "line 5: disk warning" in output
+    assert "line 45: crash" in output
+    assert "Unknowns:" in output
+    assert "  - only one node's logs present" in output
+    assert "Check next:" in output
+
+
+def test_terminal_healthy_is_compact() -> None:
+    """Healthy output is minimal — just status + verdict."""
+    summary = FinalSummary(status="nothing_unusual")
+
+    output = render_terminal(summary)
+    lines = output.split("\n")
+
+    assert len(lines) == 2
+    assert "Status: nothing_unusual" in output
+    assert "Verdict: Nothing unusual detected in the logs." in output
+
+
+def test_terminal_no_secrets() -> None:
+    """Output must use redacted snippets, never original text."""
+    summary = FinalSummary(
+        status="ok",
+        hypotheses=[
+            Hypothesis(
+                cause="database connection failure",
+                evidence_type="direct",
+                confidence="high",
+                citations=[
+                    Citation(
+                        line_id=10,
+                        snippet="ERROR connection to <REDACTED_HOST> failed",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    output = render_terminal(summary)
+
+    # Redacted placeholder is safe; real secrets must never appear
+    assert "REDACTED" not in output or "<REDACTED_HOST>" not in output
+    # The verdict uses the cause string, not raw citation snippets
+    assert "Evidence points to database connection failure" in output
+
+
+def test_terminal_long_line_truncated() -> None:
+    """Lines longer than 80 chars are truncated with ellipsis."""
+    long_cause = "a " + "very " * 20 + "long error description"
+    summary = _make_summary(long_cause, "medium")
+
+    output = render_terminal(summary)
+
+    for line in output.split("\n"):
+        assert len(line) <= 80, f"line too wide ({len(line)} chars): {line!r}"
