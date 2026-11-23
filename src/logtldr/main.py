@@ -1,6 +1,7 @@
 """logtldr command-line entry point."""
 
 import argparse
+import os
 import sys
 from typing import NoReturn, Optional
 
@@ -86,9 +87,35 @@ def main(argv: Optional[list[str]] = None) -> int:
     else:
         # 7. COMPRESS → PROMPT → LLM GATEWAY
         # Resolve model: --local without --model → baseline local model
-        is_local = args.local or bool(args.model and args.model.startswith("ollama/"))
+                # Resolve local vs external ---------------------------------
+        #   Local is the default.  External only when the user passes
+        #   a non-ollama --model *and* confirms with --yes or env var.
+
+        if args.model and args.model.startswith("ollama/"):
+            is_local = True
+        elif args.local:
+            is_local = True
+        elif args.model:
+            # Explicit non-ollama model → external
+            is_local = False
+        else:
+            # No model, no --local → safe default is local
+            is_local = True
+
         model = args.model or (DEFAULT_LOCAL_MODEL if is_local else "gpt-4o-mini")
-        api_base = "http://localhost:11434" if is_local else "https://api.openai.com/v1"
+
+        # Confirmation gate: external API needs explicit opt-in
+        if not is_local:
+            confirm = args.yes or os.environ.get("LOGTLDR_CONFIRM_API") == "1"
+            if not confirm:
+                print(
+                    "logtldr: sending logs to an external API requires "
+                    "--yes or LOGTLDR_CONFIRM_API=1",
+                    file=sys.stderr,
+                )
+                return 1
+
+        api_base = "http://localhost:11434" if is_local else None
         config = Config(model=model, api_base=api_base, local=is_local)
 
         # Token budget: local models get a smaller budget so they stay
