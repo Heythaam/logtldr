@@ -6,7 +6,7 @@ from importlib.resources import files
 
 import yaml
 
-from logtldr.models import FinalSummary, Hypothesis, LLMResponse, LogLine
+from logtldr.models import Citation, FinalSummary, Hypothesis, LLMResponse, LogLine
 
 # Load the direct-cause catalog once at module level
 try:
@@ -32,6 +32,25 @@ _DEPLOY_MARKERS = [
     re.compile(r"application\s+started", re.I),
     re.compile(r"rolling\s+update.*v?(\d+\.\d+[\.\d]*)", re.I),
 ]
+
+
+# Upstream dependency patterns (LT-35)
+_UPSTREAM_PATTERNS = [
+    re.compile(r"connection refused", re.I),
+    re.compile(r"connect timed?\s*out", re.I),
+    re.compile(r"5\d{2}\s+(bad gateway|service unavailable|gateway timeout|internal server error)", re.I),
+    re.compile(r"upstream\s+(unreachable|timeout|error)", re.I),
+    re.compile(r"no route to host", re.I),
+    re.compile(r"name.+not (resolve|known)", re.I),
+    re.compile(r"ECONNREFUSED", re.I),
+    re.compile(r"ETIMEDOUT", re.I),
+]
+
+# Common dependency names to extract from log messages
+_DEP_NAMES = re.compile(
+    r"(?:to|from|at|connecting to|calling|reaching)\s+['\"]?([a-zA-Z][\w.-]+(?::\d+)?)['\"]?",
+    re.I,
+)
 
 # Generic advice patterns that add no value (LT-34)
 _GENERIC_ADVICE_PATTERNS = [
@@ -132,6 +151,45 @@ def _generate_unknowns(lines: list[LogLine], hypotheses: list[Hypothesis]) -> li
     return unknowns
 
 
+def _detect_upstream_dependency(
+    lines: list[LogLine], hypotheses: list[Hypothesis],
+) -> Hypothesis | None:
+    """When upstream patterns appear without direct evidence, generate an alternative hypothesis (LT-35)."""
+    # Skip if there's already a high-confidence direct hypothesis
+    if hypotheses:
+        top = hypotheses[0]
+        if top.evidence_type == "direct" and top.confidence == "high":
+            return None
+
+    matching_lines: list[LogLine] = []
+    for line in lines:
+        if line.level not in ("WARN", "ERROR", "FATAL"):
+            continue
+        text = line.message or line.original_text
+        if any(pat.search(text) for pat in _UPSTREAM_PATTERNS):
+            matching_lines.append(line)
+
+    if not matching_lines:
+        return None
+
+    # Try to extract the dependency name from the first matching line
+    first = matching_lines[0]
+    text = first.message or first.original_text
+    dep_match = _DEP_NAMES.search(text)
+    dep_name = dep_match.group(1) if dep_match else "an upstream service"
+    citations = [
+        Citation(line_id=ml.line_id, snippet=ml.message[:80])
+        for ml in matching_lines[:3]
+    ]
+
+    return Hypothesis(
+        cause=f"Cause is likely upstream in {dep_name}. Check its logs.",
+        evidence_type="temporal",
+        confidence="medium" if len(matching_lines) >= 2 else "low",
+        citations=citations,
+    )
+
+
 def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
     """Apply rules to downgrade evidence, cap confidence, and generate unknowns."""
     hypotheses = response.hypotheses or []
@@ -151,6 +209,11 @@ def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
         timing_note = _deploy_timing_note(deploy_marker, lines)
         if timing_note:
             unknowns.insert(0, timing_note)
+
+    # Upstream dependency heuristic (LT-35)
+    upstream_hyp = _detect_upstream_dependency(lines, hypotheses)
+    if upstream_hyp:
+        hypotheses.append(upstream_hyp)
 
     check_next = response.check_next
     if is_generic_advice(check_next):

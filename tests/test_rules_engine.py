@@ -268,3 +268,63 @@ def test_specific_advice_kept_in_apply_rules() -> None:
 
     result = apply_rules(response, lines)
     assert result.check_next == "Run `kubectl logs auth-svc` to check for TLS handshake errors"
+
+# --- LT-35 Tests ---
+
+def test_upstream_connection_refused() -> None:
+    """Connection refused without direct evidence generates upstream hypothesis (LT-35)."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "Processing request").model_copy(
+            update={"timestamp": now, "source_format": "plaintext"}
+        ),
+        _make_line(2, "ERROR", "connection refused to payment-svc:8443").model_copy(
+            update={"timestamp": now + timedelta(seconds=5), "source_format": "plaintext"}
+        ),
+        _make_line(3, "ERROR", "connection refused to payment-svc:8443").model_copy(
+            update={"timestamp": now + timedelta(seconds=10), "source_format": "plaintext"}
+        ),
+    ]
+    response = LLMResponse(status="ok", hypotheses=[])
+
+    result = apply_rules(response, lines)
+
+    # Should have an upstream alternative hypothesis
+    assert result.hypotheses
+    upstream = [h for h in result.hypotheses if "upstream" in h.cause.lower()]
+    assert len(upstream) == 1
+    assert "payment-svc:8443" in upstream[0].cause
+    assert upstream[0].evidence_type == "temporal"
+    assert upstream[0].confidence == "medium"
+
+
+def test_upstream_skipped_with_direct_evidence() -> None:
+    """Upstream heuristic does not fire when a high-confidence direct cause exists."""
+    lines = [
+        _make_line(1, "ERROR", "connection refused to db:5432"),
+        _make_line(2, "FATAL", "Container OOMKilled with exit code 137"),
+    ]
+    citations = [Citation(line_id=2, snippet="OOMKilled")]
+    hyp = _make_hyp("direct", "high", citations)
+    response = LLMResponse(status="ok", hypotheses=[hyp])
+
+    result = apply_rules(response, lines)
+
+    # The direct hypothesis is there, no upstream added
+    assert len(result.hypotheses) == 1
+    assert result.hypotheses[0].evidence_type == "direct"
+
+
+def test_upstream_single_match_is_low_confidence() -> None:
+    """A single upstream pattern match gets low confidence."""
+    lines = [
+        _make_line(1, "INFO", "Starting up"),
+        _make_line(2, "ERROR", "ETIMEDOUT connecting to cache-redis:6379"),
+    ]
+    response = LLMResponse(status="ok", hypotheses=[])
+
+    result = apply_rules(response, lines)
+
+    upstream = [h for h in result.hypotheses if "upstream" in h.cause.lower()]
+    assert len(upstream) == 1
+    assert upstream[0].confidence == "low"
