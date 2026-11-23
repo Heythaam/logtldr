@@ -23,16 +23,16 @@ def check_refuse_gate(
     lines: list[LogLine], anomalies: list[Anomaly]
 ) -> tuple[str, dict[str, int]]:
     """Determine if we have enough signal to proceed.
-    
+
     Returns a tuple of (status, statistics).
     """
     total_lines = len(lines)
-    
+
     # Calculate statistics
     parseable_lines = sum(1 for line in lines if _is_parseable(line))
     error_count = sum(1 for line in lines if line.level in ("ERROR", "FATAL"))
     warning_count = sum(1 for line in lines if line.level == "WARN")
-    
+
     stats = {
         "total_lines": total_lines,
         "parseable_lines": parseable_lines,
@@ -40,19 +40,24 @@ def check_refuse_gate(
         "warning_count": warning_count,
     }
 
-    # 1. Too little data (Line count)
+    # 1. Absolute minimum — need at least a few lines
+    if total_lines < 3:
+        return "not_enough_signal", stats
+
+    # 2. Nothing unusual — no anomalies means healthy log, decide early
+    if not anomalies:
+        return "nothing_unusual", stats
+
+    # 3. Too little data (line count) — but only gate the LLM path
     is_ci = any(line.source_format in _CI_FORMATS for line in lines)
-    min_lines = 5 if is_ci else 50
-    
+    min_lines = 5 if is_ci else 15
+
     if total_lines < min_lines:
         return "not_enough_signal", stats
 
-    # 2. Too little data (Parseable percentage)
-    if total_lines > 0 and (parseable_lines / total_lines) < 0.30:
-        return "not_enough_signal", stats
-
-    # 3. Nothing unusual (No anomalies found)
-    if not anomalies:
-        return "nothing_unusual", stats
+    # 4. Parseable check — skip if real errors exist (the signal is there)
+    if error_count == 0 and warning_count == 0:
+        if total_lines > 0 and (parseable_lines / total_lines) < 0.30:
+            return "not_enough_signal", stats
 
     return "proceed", stats

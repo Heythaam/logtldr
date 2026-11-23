@@ -22,13 +22,13 @@ def _make_line(
 
 def test_not_enough_signal() -> None:
     """If the log is too short, it should return not_enough_signal."""
-    lines = [_make_line(i) for i in range(1, 20)]  # 19 lines (< 50)
+    lines = [_make_line(i) for i in range(1, 11)]  # 10 lines (< 15)
     anomalies = [Anomaly(type="x", line_ids=[1], description="desc")]
     
     status, stats = check_refuse_gate(lines, anomalies)
     
     assert status == "not_enough_signal"
-    assert stats["total_lines"] == 19
+    assert stats["total_lines"] == 10
 
 
 def test_short_ci_log_not_refused() -> None:
@@ -68,13 +68,17 @@ def test_low_parseable_percentage() -> None:
 
     # 10 lines are parseable (error level)
     for i in range(1, 11):
-        lines.append(_make_line(i, level="ERROR"))
+        lines.append(LogLine(
+            line_id=i, original_text="msg", redacted_text="msg",
+            level="INFO", message="msg", source_format="plaintext",
+            timestamp="2024-01-01T00:00:00"
+        ))
         
     # 90 lines are unparseable
     for i in range(11, 101):
         lines.append(_bad_line(i))
         
-    status, stats = check_refuse_gate(lines, [])
+    status, stats = check_refuse_gate(lines, [Anomaly(type="x", line_ids=[1], description="desc")])
     
     assert status == "not_enough_signal"
     assert stats["parseable_lines"] == 10
