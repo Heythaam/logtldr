@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 
 from logtldr.models import Citation, Hypothesis, LLMResponse, LogLine
-from logtldr.rules_engine import apply_rules, is_generic_advice
+from logtldr.rules_engine import apply_rules, detect_deploy_marker, is_generic_advice
 
 
 def _make_line(line_id: int, level: str, msg: str) -> LogLine:
@@ -107,7 +107,7 @@ def test_direct_confidence_unchanged() -> None:
     """Direct evidence keeps the LLM's exact confidence level."""
     lines = [_make_line(1, "ERROR", "Container OOMKilled")]
     citations = [Citation(line_id=1, snippet="OOMKilled")]
-    
+
     # Test all three levels
     for level in ["high", "medium", "low"]:
         hyp = _make_hyp("direct", level, citations)
@@ -129,7 +129,7 @@ def test_unknowns_time_window() -> None:
         _make_line(2, "ERROR", "fail").model_copy(update={"timestamp": now + timedelta(minutes=2), "source_format": "plaintext"}),
     ]
     response = LLMResponse(status="ok", hypotheses=[])
-    
+
     result = apply_rules(response, lines)
     assert any("logs cover only 2 minutes" in u for u in result.unknowns)
 
@@ -145,7 +145,7 @@ def test_unknowns_external_dep() -> None:
     hyp = _make_hyp("temporal", "medium", citations)
     hyp.cause = "Database connection timeout"
     response = LLMResponse(status="ok", hypotheses=[hyp])
-    
+
     result = apply_rules(response, lines)
     assert any("external dependency" in u for u in result.unknowns)
     assert any("only one service" in u for u in result.unknowns)
@@ -159,10 +159,55 @@ def test_time_window_skips_ci() -> None:
         _make_line(2, "ERROR", "fail").model_copy(update={"timestamp": now + timedelta(minutes=2), "source_format": "pytest"}),
     ]
     response = LLMResponse(status="ok", hypotheses=[])
-    
+
     result = apply_rules(response, lines)
     # Should be empty because the time window rule is skipped for CI
     assert not any("logs cover only" in u for u in result.unknowns)
+
+
+# --- LT-33 Tests ---
+
+def test_deploy_marker_version() -> None:
+    """Detects a versioned deploy marker and generates timing note (LT-33)."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "starting v2.3.1").model_copy(
+            update={"timestamp": now, "source_format": "plaintext"}
+        ),
+        _make_line(2, "INFO", "healthcheck ok").model_copy(
+            update={"timestamp": now + timedelta(seconds=20), "source_format": "plaintext"}
+        ),
+        _make_line(3, "ERROR", "connection pool exhausted").model_copy(
+            update={"timestamp": now + timedelta(seconds=40), "source_format": "plaintext"}
+        ),
+    ]
+    response = LLMResponse(status="ok", hypotheses=[])
+
+    result = apply_rules(response, lines)
+    assert any("40s after v2.3.1 started" in u for u in result.unknowns)
+
+
+def test_deploy_marker_startup() -> None:
+    """Detects a non-versioned startup marker (LT-33)."""
+    now = datetime.now()
+    lines = [
+        _make_line(1, "INFO", "config reloaded").model_copy(
+            update={"timestamp": now, "source_format": "plaintext"}
+        ),
+        _make_line(2, "ERROR", "null pointer exception").model_copy(
+            update={"timestamp": now + timedelta(seconds=15), "source_format": "plaintext"}
+        ),
+    ]
+
+    marker = detect_deploy_marker(lines)
+    assert marker is not None
+    assert marker["label"] == "deploy/restart"
+
+    result = apply_rules(LLMResponse(status="ok", hypotheses=[]), lines)
+    assert any("15s after deploy/restart started" in u for u in result.unknowns)
+
+
+# --- LT-34 Tests ---
 
 def test_generic_advice_flagged() -> None:
     """Generic check_next patterns are detected and suppressed (LT-34)."""
