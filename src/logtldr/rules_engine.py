@@ -20,7 +20,6 @@ _CI_FORMATS = ("pytest", "npm", "json")
 # Keywords indicating an external dependency issue
 _EXTERNAL_KEYWORDS = ("timeout", "connection refused", "unreachable", "external", "upstream", "dependency")
 
-
 # Deploy/startup marker patterns (LT-33)
 _DEPLOY_MARKERS = [
     re.compile(r"starting\s+v?(\d+\.\d+[\.\d]*)", re.I),
@@ -32,6 +31,20 @@ _DEPLOY_MARKERS = [
     re.compile(r"server\s+started", re.I),
     re.compile(r"application\s+started", re.I),
     re.compile(r"rolling\s+update.*v?(\d+\.\d+[\.\d]*)", re.I),
+]
+
+# Generic advice patterns that add no value (LT-34)
+_GENERIC_ADVICE_PATTERNS = [
+    re.compile(r"^check (the )?(network|logs?|service|system|config(uration)?)\b", re.I),
+    re.compile(r"^restart (the )?(service|server|pod|container|node|process)\b", re.I),
+    re.compile(r"^investigate (further|more|the issue)\b", re.I),
+    re.compile(r"^monitor (the )?(system|service|logs?|metrics?)\b", re.I),
+    re.compile(r"^review (the )?(logs?|config(uration)?|settings?)\b", re.I),
+    re.compile(r"^contact (support|admin|the team)\b", re.I),
+    re.compile(r"^try (again|restarting|rebooting)\b", re.I),
+    re.compile(r"^look (at|into) (the )?(logs?|error|issue)\b", re.I),
+    re.compile(r"^ensure (the )?(service|system|config)", re.I),
+    re.compile(r"^verify (the )?(service|system|config|network)", re.I),
 ]
 
 def _matches_catalog(text: str) -> bool:
@@ -50,18 +63,18 @@ def _is_direct_evidence(hypothesis: Hypothesis, lines: list[LogLine]) -> bool:
         return False
 
     line_dict = {line.line_id: line for line in lines}
-    
+
     for citation in hypothesis.citations:
         line = line_dict.get(citation.line_id)
         if not line:
             continue
-            
+
         if line.level not in ("WARN", "ERROR", "FATAL"):
             continue
-            
+
         if _matches_catalog(line.message) or _matches_catalog(citation.snippet):
             return True
-            
+
     return False
 
 
@@ -83,7 +96,7 @@ def _generate_unknowns(lines: list[LogLine], hypotheses: list[Hypothesis]) -> li
     # 1. Short time window rule (< 5 min, service logs only)
     first_ts = lines[0].timestamp
     last_ts = lines[-1].timestamp
-    
+
     if first_ts and last_ts and lines[0].source_format not in _CI_FORMATS:
         window = last_ts - first_ts
         if window < timedelta(minutes=5):
@@ -105,12 +118,12 @@ def _generate_unknowns(lines: list[LogLine], hypotheses: list[Hypothesis]) -> li
         hyp_text = top_hyp.cause.lower()
         cit_text = " ".join([c.snippet.lower() for c in top_hyp.citations])
         combined_text = hyp_text + " " + cit_text
-        
+
         points_to_external = any(kw in combined_text for kw in _EXTERNAL_KEYWORDS)
-        
+
         if points_to_external:
             unknowns.append("errors point to an external dependency; check its logs separately")
-            
+
             # If we can't see evidence of the dependency in our logs (single service)
             # A simple heuristic: if the log format is plaintext and we have no IPs of other services.
             # We'll just assume single-service for this MVP.
@@ -122,12 +135,12 @@ def _generate_unknowns(lines: list[LogLine], hypotheses: list[Hypothesis]) -> li
 def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
     """Apply rules to downgrade evidence, cap confidence, and generate unknowns."""
     hypotheses = response.hypotheses or []
-    
+
     for hyp in hypotheses:
         if hyp.evidence_type == "direct":
             if not _is_direct_evidence(hyp, lines):
                 hyp.evidence_type = "temporal"
-                
+
         hyp.confidence = cap_confidence(hyp.evidence_type, hyp.confidence)
 
     unknowns = _generate_unknowns(lines, hypotheses)
@@ -139,13 +152,17 @@ def apply_rules(response: LLMResponse, lines: list[LogLine]) -> FinalSummary:
         if timing_note:
             unknowns.insert(0, timing_note)
 
+    check_next = response.check_next
+    if is_generic_advice(check_next):
+        check_next = None
+
     return FinalSummary(
         status=response.status,
         verdict=response.verdict,
         hypotheses=hypotheses,
         timeline=response.timeline,
         unknowns=unknowns,
-        check_next=response.check_next,
+        check_next=check_next,
     )
 
 def detect_deploy_marker(lines: list[LogLine]) -> dict | None:
@@ -188,3 +205,11 @@ def _deploy_timing_note(marker: dict, lines: list[LogLine]) -> str | None:
                 time_str = f"{secs // 3600}h{(secs % 3600) // 60}m"
             return f"Errors started {time_str} after {marker['label']} started."
     return None
+
+
+def is_generic_advice(text: str | None) -> bool:
+    """Return True if check_next text matches a known generic pattern (LT-34)."""
+    if not text:
+        return False
+    text = text.strip()
+    return any(pat.search(text) for pat in _GENERIC_ADVICE_PATTERNS)
