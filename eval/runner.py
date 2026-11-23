@@ -81,7 +81,7 @@ def run_pipeline(log_path: Path) -> tuple[FinalSummary, list, bool]:
     api_key = _resolve_api_key()
     model = os.environ.get("LOGTLDR_MODEL", "groq/openai/gpt-oss-20b")
     is_local = model.startswith("ollama/")
-    api_base = None  # let LiteLLM route by prefix
+    api_base = os.environ.get("LOGTLDR_API_BASE", "http://localhost:11434") if is_local else None
 
     config = Config(model=model, api_base=api_base, local=is_local, api_key=api_key)
     gateway = LLMGateway(config)
