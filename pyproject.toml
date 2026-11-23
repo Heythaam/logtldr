@@ -21,6 +21,7 @@ dev = [
     "ruff",
     "mypy",
     "types-PyYAML",
+    "pytest-socket",
 ]
 
 [project.scripts]
@@ -51,6 +52,9 @@ warn_redundant_casts = true
 testpaths = ["tests"]
 filterwarnings = ["error"]
 addopts = "-ra"
+markers = [
+    "disable_socket: block all network sockets (requires pytest-socket)",
+]
 
 
 [[tool.mypy.overrides]]
