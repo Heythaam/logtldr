@@ -45,9 +45,11 @@ def _run(monkeypatch: pytest.MonkeyPatch, stdin: str, argv: list[str]) -> int:
     return main(argv)
 
 
+@patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_skeleton_runs_end_to_end(
     mock_completion: MagicMock,
+    mock_httpx: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -62,9 +64,11 @@ def test_skeleton_runs_end_to_end(
     assert payload["hypotheses"][0]["citations"][0]["line_id"] == 55
 
 
+@patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_real_prompt_reaches_llm(
     mock_completion: MagicMock,
+    mock_httpx: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -78,9 +82,11 @@ def test_real_prompt_reaches_llm(
     assert "ERROR boom" in messages[1]["content"]
 
 
+@patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_invalid_citation_downgrades_to_not_enough_signal(
     mock_completion: MagicMock,
+    mock_httpx: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -124,9 +130,11 @@ def test_healthy_eval_case_skips_llm(
     mock_completion.assert_not_called()
 
 
+@patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_llm_failure_exits_1_with_message(
     mock_completion: MagicMock,
+    mock_httpx: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
