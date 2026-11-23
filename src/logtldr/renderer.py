@@ -4,6 +4,9 @@ from typing import List
 
 from logtldr.models import FinalSummary
 
+MAX_WIDTH = 80
+MAX_LINES = 30
+
 
 def format_verdict(summary: FinalSummary) -> str:
     """Format the verdict deterministically (LT-29).
@@ -79,12 +82,54 @@ def _sort_timeline_events(timeline: list) -> list:
     return sorted(timeline, key=sort_key)
 
 
+def _truncate(text: str, width: int = MAX_WIDTH) -> str:
+    """Truncate a string to fit within width, adding ellipsis if needed."""
+    if len(text) <= width:
+        return text
+    return text[: width - 3] + "..."
+
+
 def render_terminal(summary: FinalSummary) -> str:
-    """Render the final summary for the terminal."""
-    lines = [format_verdict(summary)]
+    """Render the final summary for the terminal (LT-31).
+
+    Layout (fits ~30 lines, 80 chars wide):
+        Status: <status>
+        Verdict: <formatted verdict>
+        Timeline: <causal chain>         (if present)
+        Unknowns:                        (if present)
+          - <unknown 1>
+          - <unknown 2>
+        Check next: <suggestion>         (if present)
+
+    All text uses redacted content only — no secrets in output.
+    """
+    lines: List[str] = []
+
+    # Status
+    lines.append(_truncate(f"Status: {summary.status}"))
+
+    # Verdict
+    verdict = format_verdict(summary)
+    lines.append(_truncate(f"Verdict: {verdict}"))
+
+    # Timeline
     tl = format_timeline(summary)
     if tl:
-        lines.append(tl)
+        lines.append("")
+        lines.append(_truncate(f"Timeline: {tl}"))
+
+    # Unknowns
+    if summary.unknowns:
+        lines.append("")
+        lines.append("Unknowns:")
+        for unknown in summary.unknowns:
+            lines.append(_truncate(f"  - {unknown}"))
+
+    # Check next
+    if summary.check_next:
+        lines.append("")
+        lines.append(_truncate(f"Check next: {summary.check_next}"))
+
     return "\n".join(lines)
 
 
