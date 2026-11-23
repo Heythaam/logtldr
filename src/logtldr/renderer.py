@@ -1,11 +1,39 @@
 """Output formatting (AD-10)."""
 
+import shutil
+import textwrap
 from typing import List
 
 from logtldr.models import FinalSummary
 
-MAX_WIDTH = 80
 MAX_LINES = 30
+
+# ANSI color codes
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+CYAN = "\033[36m"
+RESET = "\033[0m"
+
+
+def _get_width() -> int:
+    """Get terminal width, default 80."""
+    try:
+        return shutil.get_terminal_size().columns
+    except Exception:
+        return 80
+
+
+def _wrap(text: str, width: int, indent: str = "") -> str:
+    """Wrap text to terminal width with optional indent for continuation lines."""
+    return textwrap.fill(
+        text,
+        width=width,
+        initial_indent="",
+        subsequent_indent=indent,
+    )
 
 
 def format_verdict(summary: FinalSummary) -> str:
@@ -82,72 +110,122 @@ def _sort_timeline_events(timeline: list) -> list:
     return sorted(timeline, key=sort_key)
 
 
-def _truncate(text: str, width: int = MAX_WIDTH) -> str:
-    """Truncate a string to fit within width, adding ellipsis if needed."""
-    if len(text) <= width:
-        return text
-    return text[: width - 3] + "..."
+def _status_color(status: str) -> str:
+    """Return ANSI color for a status."""
+    if status == "ok":
+        return RED  # there IS a problem
+    elif status == "nothing_unusual":
+        return GREEN
+    elif status == "not_enough_signal":
+        return YELLOW
+    return ""
 
 
 def render_terminal(summary: FinalSummary) -> str:
     """Render the final summary for the terminal (LT-31).
 
-    Layout (fits ~30 lines, 80 chars wide):
-        Status: <status>
-        Verdict: <formatted verdict>
-        Timeline: <causal chain>         (if present)
-        Unknowns:                        (if present)
-          - <unknown 1>
-          - <unknown 2>
-        Check next: <suggestion>         (if present)
+    Layout (fits ~30 lines, adapts to terminal width):
+        ┌─ logtldr ─────────────────────────┐
+        │ Status: ok                         │
+        │                                    │
+        │ Verdict:                           │
+        │   Evidence points to ...           │
+        │                                    │
+        │ Citations:                         │
+        │   [line 16] "ERROR: value too..."  │
+        │                                    │
+        │ Check next:                        │
+        │   Check the PostgreSQL database... │
+        └────────────────────────────────────┘
 
     All text uses redacted content only — no secrets in output.
     """
+    width = _get_width()
+    inner = width - 4  # padding for "│ " and " │"
     lines: List[str] = []
 
+    # Header
+    header_text = " logtldr "
+    dash_count = width - 2 - len(header_text)
+    left_dashes = 2
+    right_dashes = dash_count - left_dashes
+    lines.append(f"{DIM}{'─' * left_dashes}{RESET}{BOLD}{header_text}{RESET}{DIM}{'─' * right_dashes}{RESET}")
+
     # Status
-    lines.append(_truncate(f"Status: {summary.status}"))
+    sc = _status_color(summary.status)
+    lines.append(f"  {BOLD}Status:{RESET} {sc}{summary.status}{RESET}")
+    lines.append("")
 
     # Verdict
     verdict = format_verdict(summary)
-    lines.append(_truncate(f"Verdict: {verdict}"))
+    lines.append(f"  {BOLD}Verdict:{RESET}")
+    wrapped = _wrap(verdict, width=inner, indent="    ")
+    lines.append(f"    {wrapped.strip()}")
+
+    # Citations from top hypothesis
+    if summary.status == "ok" and summary.hypotheses:
+        top_hyp = summary.hypotheses[0]
+        if top_hyp.citations:
+            lines.append("")
+            lines.append(f"  {BOLD}Evidence:{RESET}")
+            for citation in top_hyp.citations[:5]:  # max 5 citations
+                snippet = citation.snippet
+                if len(snippet) > inner - 15:
+                    snippet = snippet[:inner - 18] + "..."
+                lines.append(
+                    f"    {DIM}line {citation.line_id}:{RESET} {CYAN}\"{snippet}\"{RESET}"
+                )
+
+        # Secondary hypotheses (if any)
+        if len(summary.hypotheses) > 1:
+            lines.append("")
+            lines.append(f"  {BOLD}Also:{RESET}")
+            for hyp in summary.hypotheses[1:3]:  # max 2 more
+                cause_short = hyp.cause.strip().rstrip(".")
+                if len(cause_short) > inner - 6:
+                    cause_short = cause_short[:inner - 9] + "..."
+                lines.append(f"    {DIM}•{RESET} {cause_short} {DIM}({hyp.confidence}){RESET}")
 
     # Timeline
     tl = format_timeline(summary)
     if tl:
         lines.append("")
-        lines.append(_truncate(f"Timeline: {tl}"))
+        lines.append(f"  {BOLD}Timeline:{RESET}")
+        wrapped_tl = _wrap(tl, width=inner, indent="    ")
+        lines.append(f"    {wrapped_tl.strip()}")
 
     # Unknowns
     if summary.unknowns:
         lines.append("")
-        lines.append("Unknowns:")
+        lines.append(f"  {BOLD}Unknowns:{RESET}")
         for unknown in summary.unknowns:
-            lines.append(_truncate(f"  - {unknown}"))
+            wrapped_u = _wrap(unknown, width=inner - 4, indent="      ")
+            lines.append(f"    {YELLOW}•{RESET} {wrapped_u.strip()}")
 
     # Check next
     if summary.check_next:
         lines.append("")
-        lines.append(_truncate(f"Check next: {summary.check_next}"))
+        lines.append(f"  {BOLD}Check next:{RESET}")
+        wrapped_cn = _wrap(summary.check_next, width=inner, indent="    ")
+        lines.append(f"    {wrapped_cn.strip()}")
+
+    # Footer
+    lines.append("")
+    lines.append(f"{DIM}{'─' * width}{RESET}")
 
     return "\n".join(lines)
 
 
 def render_json(summary: FinalSummary) -> str:
-    """Render the full JSON output (LT-32).
-
-    Includes: status, verdict (formatted), all hypotheses, timeline
-    (sorted chronologically), unknowns, and check_next.
-    Output is valid JSON parseable by ``python -m json.tool``.
-    """
+    """Render JSON output, colorized when printing to terminal (LT-32)."""
     import json
+    import sys
 
     output: dict = {
         "status": summary.status,
         "verdict": format_verdict(summary),
     }
 
-    # All hypotheses (not just top)
     if summary.hypotheses:
         output["hypotheses"] = [
             {
@@ -164,16 +242,32 @@ def render_json(summary: FinalSummary) -> str:
     else:
         output["hypotheses"] = []
 
-    # Timeline (sorted)
     if summary.timeline:
         output["timeline"] = _sort_timeline_events(summary.timeline)
     else:
         output["timeline"] = []
 
-    # Unknowns
     output["unknowns"] = summary.unknowns or []
-
-    # Check next
     output["check_next"] = summary.check_next
 
-    return json.dumps(output, indent=2)
+    raw = json.dumps(output, indent=2)
+
+    # Only colorize when outputting to a real terminal, not a pipe
+    if not sys.stdout.isatty():
+        return raw
+
+    import re
+
+    # Keys: bold cyan
+    raw = re.sub(r'"([^"]+)"(?=\s*:)', f'{BOLD}{CYAN}"\\1"{RESET}', raw)
+    # String values: green
+    raw = re.sub(r':\s*"([^"]*)"', lambda m: f': {GREEN}"{m.group(1)}"{RESET}', raw)
+    # Numbers: yellow
+    raw = re.sub(r':\s*(\d+)', lambda m: f': {YELLOW}{m.group(1)}{RESET}', raw)
+    # Booleans/null: dim
+    raw = re.sub(r':\s*(true|false|null)', lambda m: f': {DIM}{m.group(1)}{RESET}', raw)
+    # Brackets: dim
+    raw = raw.replace('[', f'{DIM}[{RESET}').replace(']', f'{DIM}]{RESET}')
+    raw = raw.replace('{', f'{DIM}{{{RESET}').replace('}', f'{DIM}}}{RESET}')
+
+    return raw
