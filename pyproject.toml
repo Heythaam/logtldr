@@ -8,8 +8,26 @@ version = "0.1.0"
 description = "Summarize logs with LLMs"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "MAJDADDIN" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Systems Administration",
+]
 dependencies = [
     "drain3",
+    "httpx",
     "litellm",
     "pydantic",
     "langfuse",
@@ -24,8 +42,13 @@ dev = [
     "pytest-socket",
 ]
 
+[project.urls]
+Homepage = "https://github.com/MAJDADDIN/logtldr"
+Repository = "https://github.com/MAJDADDIN/logtldr"
+Issues = "https://github.com/MAJDADDIN/logtldr/issues"
+
 [project.scripts]
-logtldr = "logtldr.main:main"
+logtldr = "logtldr.main:_entry"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
