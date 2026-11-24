@@ -4,6 +4,8 @@ import argparse
 import json
 import os
 import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as pkg_version
 from pathlib import Path
 from typing import NoReturn, Optional
 
@@ -153,8 +155,16 @@ class _Parser(argparse.ArgumentParser):
         self.exit(1, f"{self.prog}: error: {message}\n")
 
 
+def _get_version() -> str:
+    try:
+        return pkg_version("logtldr")
+    except PackageNotFoundError:
+        return "0.1.0"
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = _Parser(prog="logtldr", description="Summarize log streams with an LLM.")
+    parser.add_argument("--version", action="version", version=f"logtldr {_get_version()}")
     parser.add_argument("source", nargs="?", metavar="FILE", help="Log file. Omit for stdin.")
     parser.add_argument("--local", action="store_true", help="Restrict LLM to localhost.")
     parser.add_argument("--json", action="store_true", dest="as_json", help="Emit JSON.")
@@ -275,5 +285,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     return 0
 
 
-if __name__ == "__main__":
+def _entry() -> None:
+    """Console-script entry point for setuptools."""
     sys.exit(main())
+
+
+if __name__ == "__main__":
+    _entry()
