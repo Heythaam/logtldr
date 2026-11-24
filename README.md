@@ -80,17 +80,17 @@ logtldr uses [LiteLLM](https://github.com/BerriAI/litellm) for model routing. An
 
 ### Bake-Off Results
 
-Evaluated on 30 incident cases (Kubernetes, CI/CD, infrastructure). "Correct" means the top hypothesis matches the expected cause **and** all citations pass the validator.
+Evaluated on 20 cases (Kubernetes, CI/CD, infrastructure): 18 diagnosis, 1 healthy-log, 1 cause-outside-logs. "Correct" means the top hypothesis matches the expected cause **and** all citations pass the validator.
 
 | Model | Accuracy (in-log) | False Positives | Avg Latency | Cost / Summary |
 |---|---|---|---|---|
-| `groq/llama-3.1-70b-versatile` | — | — | — | — |
-| `gemini/gemini-1.5-flash` | — | — | — | — |
-| `ollama/llama3.1:8b` (local) | — | — | — | — |
-| `gpt-4o-mini` | — | — | — | — |
+| `ollama/qwen2.5:7b` (local) | 83% (15/18) | 0 | 46.2 s | free |
+| `ollama/llama3.1:8b` (local) | 83% (15/18) | 0 | 55.2 s | free |
 
-> **Fill in from `eval/results/*.json` after running the eval suite (LT-41).**
-> Accuracy is measured on in-log cases only (excludes healthy-log and cause-outside-logs cases).
+Both models correctly refused to diagnose the healthy log (0 false positives) and correctly returned "not enough signal" on the misleading-timeout case (0 fabricated causes). JSON output was valid 100% of the time.
+
+> Numbers sourced from `eval/results/*.json`. Accuracy is measured on in-log diagnosis cases only.
+> API model results will be added once cloud evals are run.
 
 ### Using a Specific Model
 

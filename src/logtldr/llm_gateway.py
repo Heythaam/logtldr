@@ -1,12 +1,11 @@
 """LiteLLM integration (AD-4)."""
 
-import json
 from typing import Any, TypeVar
 from urllib.parse import urlparse
 
 import httpx
 import litellm
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from logtldr.config import Config
 from logtldr.models import CompressedView
@@ -71,65 +70,68 @@ class LLMGateway:
                 f"Check your config (api_base={api_base}) or provide an API key."
             )
 
+
+
     def call_summarize(self, compressed_view: CompressedView, schema: type[T]) -> T:
-        """Call LLM and return validated structured output."""
         messages = build_messages(compressed_view)
+        is_ollama = self.model.startswith("ollama/")
 
         for attempt in range(3):
             raw_text = None
             try:
-                # 1. Try json_schema first (OpenAI/Claude support)
-                try:
+                if is_ollama:
+                    # Ollama: skip json_schema (always fails), go straight to JSON mode
                     response = litellm.completion(
                         model=self.model,
                         messages=messages,
                         temperature=self.config.temperature,
-                        response_format={
-                            "type": "json_schema",
-                            "json_schema": {"name": "summary", "schema": schema.model_json_schema()}
-                        }
+                        **self._get_ollama_params(),
                     )
-                    raw_text = response.choices[0].message.content  # type: ignore
-                except Exception:
-                    # 2. Fallback: JSON mode + Pydantic validation (Ollama/older models)
-                    response = litellm.completion(
-                        model=self.model,
-                        messages=messages,
-                        temperature=self.config.temperature,
-                        **self._get_ollama_params()
-                    )
-                    raw_text = response.choices[0].message.content  # type: ignore
+                    raw_text = response.choices[0].message.content
+                else:
+                    # 1. Try json_schema first (OpenAI/Claude support)
+                    try:
+                        response = litellm.completion(
+                            model=self.model,
+                            messages=messages,
+                            temperature=self.config.temperature,
+                            response_format={
+                                "type": "json_schema",
+                                "json_schema": {"name": "summary", "schema": schema.model_json_schema()}
+                            }
+                        )
+                        raw_text = response.choices[0].message.content
+                    except Exception:
+                        # 2. Fallback: JSON mode + Pydantic validation (older models)
+                        response = litellm.completion(
+                            model=self.model,
+                            messages=messages,
+                            temperature=self.config.temperature,
+                        )
+                        raw_text = response.choices[0].message.content
 
                 if not raw_text:
-                    raise ValueError("LLM returned an empty response.")
+                    raise ValueError("Empty response from LLM")
 
-                # 3. Validate and parse
                 return schema.model_validate_json(raw_text)
 
-            except (json.JSONDecodeError, ValidationError, ValueError) as e:
-                if attempt < 2:
-                    # 4. Show the model its bad reply and the error, then ask again
-                    retry: list[dict[str, str]] = []
-                    if raw_text:
-                        retry.append({"role": "assistant", "content": str(raw_text)})
-                    retry.append({
-                        "role": "user",
-                        "content": (
-                            f"Your previous reply was not valid: {str(e)[:300]}. "
-                            "Reply again with only the JSON object."
-                        ),
-                    })
-                    messages = [*messages, *retry]
-                    continue
-                else:
-                    # 5. Give up after 3 failures
+            except Exception as exc:
+                if attempt == 2:
                     raise RuntimeError(
-                        f"LLM returned invalid JSON after 3 attempts: {e}. "
-                        f"Check model capacity (try a larger model or API model)."
-                    )
-        
-        raise RuntimeError("Unreachable")  # Satisfy mypy
+                        f"LLM returned invalid JSON after 3 attempts: {exc}"
+                    ) from exc
+                # Feed the bad reply back so the LLM can self-correct
+                if raw_text is not None:
+                    messages = messages + [
+                        {"role": "assistant", "content": raw_text},
+                        {"role": "user", "content": "That was not valid JSON. Return only valid JSON matching the schema."},
+                    ]
 
+        # Unreachable, but keeps mypy happy
+        raise RuntimeError("LLM returned invalid JSON after 3 attempts")
+
+
+    
     def _get_ollama_params(self) -> dict[str, Any]:
         """Ollama-specific parameters."""
         if "ollama" in self.model:

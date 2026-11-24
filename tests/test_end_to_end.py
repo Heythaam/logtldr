@@ -45,11 +45,13 @@ def _run(monkeypatch: pytest.MonkeyPatch, stdin: str, argv: list[str]) -> int:
     return main(argv)
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_skeleton_runs_end_to_end(
     mock_completion: MagicMock,
     mock_httpx: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -64,11 +66,13 @@ def test_skeleton_runs_end_to_end(
     assert payload["hypotheses"][0]["citations"][0]["line_id"] == 55
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_real_prompt_reaches_llm(
     mock_completion: MagicMock,
     mock_httpx: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -82,11 +86,13 @@ def test_real_prompt_reaches_llm(
     assert "ERROR boom" in messages[1]["content"]
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_invalid_citation_downgrades_to_not_enough_signal(
     mock_completion: MagicMock,
     mock_httpx: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -101,9 +107,11 @@ def test_invalid_citation_downgrades_to_not_enough_signal(
     assert payload["status"] == "not_enough_signal"
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("litellm.completion")
 def test_healthy_log_skips_llm(
     mock_completion: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -118,9 +126,11 @@ def test_healthy_log_skips_llm(
     not (EVAL_CASES / "09_healthy_ci_run" / "input.log").exists(),
     reason="eval case 09 not present",
 )
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("litellm.completion")
 def test_healthy_eval_case_skips_llm(
     mock_completion: MagicMock,
+    mock_config: MagicMock,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Acceptance: eval case 09 returns nothing_unusual without calling the LLM."""
@@ -130,11 +140,13 @@ def test_healthy_eval_case_skips_llm(
     mock_completion.assert_not_called()
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_llm_failure_exits_1_with_message(
     mock_completion: MagicMock,
     mock_httpx: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
