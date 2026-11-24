@@ -2,13 +2,11 @@
 
 Thousands of log lines → one-screen incident summary.
 
-`logtldr` is a CLI tool for on-call engineers. Pipe noisy logs into it and get back a structured summary: what happened, in what order, the probable cause, and what to check next. The AI proposes, plain code verifies — every citation is checked against the original lines, confidence is capped by deterministic rules, and secrets are stripped before anything reaches a model.
+Pipe noisy logs in, get back what happened, why, and what to check next. Every claim is cited against the original lines — if the AI can't prove it from your logs, it doesn't say it.
 
 ```
 kubectl logs my-pod --since=1h | logtldr
 ```
-
-<!-- TODO: replace with demo GIF (LT-42) -->
 
 ## Install
 
@@ -16,158 +14,164 @@ kubectl logs my-pod --since=1h | logtldr
 pip install logtldr
 ```
 
-Requires Python 3.11+. For local-only mode (the default), install [Ollama](https://ollama.com) and pull a model:
+Requires Python 3.10+.
+
+By default logtldr runs locally with [Ollama](https://ollama.com) — no data leaves your machine. To set it up:
 
 ```bash
 ollama pull llama3.1:8b
 ```
 
-## Quick Start
-
-**Summarize a log file:**
+## Usage
 
 ```bash
+# Summarize a log file
 logtldr /var/log/app/error.log
-```
 
-**Pipe from kubectl:**
+# Pipe from Docker
+docker logs my-container 2>&1 | logtldr
 
-```bash
+# Pipe from kubectl
 kubectl logs deploy/api-server --since=1h | logtldr
-```
 
-**Diagnose a failed CI run:**
-
-```bash
+# Diagnose a failed CI run
 gh run view <run-id> --log-failed | logtldr
+
+# JSON output for scripting
+docker logs my-container 2>&1 | logtldr --json | jq '.hypotheses[0].cause'
 ```
 
-## Output Formats
+## What You Get
 
-**Terminal (default)** — a one-screen summary with verdict, timeline, citations, and unknowns:
+**In your terminal** — a colored, one-screen summary:
+
+```
+─────────────────── logtldr ───────────────────
+Status: problem_detected
+Verdict: Redis hit maxmemory limit, triggering OOM
+         and dropping client connections.
+
+Evidence:
+  [1] line 42: "OOM command not allowed when used memory > 'maxmemory'"
+  [2] line 38: "Client closed connection"
+
+Timeline:
+  → line 12: INFO Server started
+  → line 38: WARNING Client closed connection
+  → line 42: ERROR OOM command not allowed
+
+Check next:
+  → Increase maxmemory or add eviction policy
+────────────────────────────────────────────────
+```
+
+**With `--json`** — structured output you can pipe into `jq`, send to Slack, or feed into other tools.
+
+## Configuration
+
+Save your preferred model and API keys so you don't have to type them every time.
 
 ```bash
-logtldr app.log
+# Set a default model
+logtldr config set-model ollama/qwen2.5:7b
+
+# Or use a cloud model
+logtldr config set-model groq/llama-3.3-70b-versatile
+
+# Save an API key (prompts securely, never shown in terminal)
+logtldr config set-key groq
+
+# See current config
+logtldr config show
+
+# Reset everything
+logtldr config clear
 ```
 
-**JSON** — machine-readable output for scripting and pipelines:
+Config is stored in `~/.config/logtldr/config.json` with restricted permissions.
+
+## CLI Reference
+
+```
+logtldr [OPTIONS] [FILE]
+```
+
+| Option | Description |
+|---|---|
+| `FILE` | Log file to analyze. Omit to read from stdin (pipe). |
+| `--model NAME` | LLM model to use (overrides saved config). |
+| `--local` | Force local mode (Ollama only). |
+| `--json` | Output as JSON instead of colored terminal summary. |
+| `--yes` | Skip the cloud API confirmation prompt. |
+| `--version` | Print version and exit. |
+| `config show` | Show saved configuration. |
+| `config set-model NAME` | Save a default model. |
+| `config set-key PROVIDER` | Save an API key for a provider (groq, openai, anthropic, etc). |
+| `config clear` | Delete saved configuration. |
+
+## Using Cloud Models
+
+By default, logtldr uses your local Ollama. To use a cloud model, you need two things:
+
+**1. An API key** — set it as an environment variable or save it:
 
 ```bash
-logtldr --json app.log | jq '.hypotheses[0].cause'
+# Option A: environment variable
+export GROQ_API_KEY=your-key-here
+
+# Option B: save it (more convenient)
+logtldr config set-key groq
 ```
+
+**2. Explicit confirmation** — logtldr never sends logs to an external API without your say-so:
+
+```bash
+# Per-command
+logtldr --model groq/llama-3.3-70b-versatile --yes app.log
+
+# Or set once for the session
+export LOGTLDR_CONFIRM_API=1
+```
+
+Supported providers: `ollama/`, `groq/`, `openai/`, `anthropic/`, `gemini/`, `openrouter/`, `xai/`.
+
+## Privacy & Security
+
+**Secrets are stripped before anything reaches a model** — local or cloud. The redactor catches AWS keys, JWTs, database URLs, Slack tokens, IP addresses, emails, and environment variable assignments. Each secret is replaced with a stable placeholder (`token_1`, `host_1`) so the model can still reason about structure.
+
+Redaction is tested in CI with real token formats. See [`tests/test_redaction_leaks.py`](tests/test_redaction_leaks.py).
+
+**Local mode is the default.** No flags needed, no data leaves your machine. Cloud mode requires `--yes` or `LOGTLDR_CONFIRM_API=1` — logtldr never prompts interactively, so piped input never blocks.
 
 ## How It Works
 
 ```
-Logs in → parse → redact secrets → mine templates (Drain3)
-       → detect anomalies → refuse-to-guess gate
-       → LLM (structured output) → validate citations
-       → cap confidence by rules → render summary
+Logs in → parse → redact → template mining (Drain3)
+       → anomaly detection → refuse gate
+       → LLM → citation validation → rules engine → render
 ```
 
-1. **Parse** — auto-detects JSON lines, plaintext, pytest, Docker, npm, and GitHub Actions formats.
-2. **Redact** — strips AWS keys, JWTs, database URLs, Slack tokens, IPs, emails, and env vars before any LLM call. Stable placeholders (`host_1`, `token_1`) preserve structure.
-3. **Template mining** — Drain3 collapses repeated patterns so the model sees structure, not noise.
-4. **Anomaly detection** — flags new templates, first errors, and frequency spikes.
-5. **Refuse gate** — healthy logs get "nothing unusual" with no LLM call. Too little data gets "not enough signal."
-6. **LLM** — receives a compressed view (templates + anomalies + sampled lines) under a strict token budget, returns structured JSON validated by Pydantic.
-7. **Citation check** — every claim must cite an exact log line. Code verifies the quote matches. A correct cause with invalid citations counts as wrong.
-8. **Rules engine** — confidence can only go down, never up. Evidence is typed (direct, correlated, inferred). Unknowns come from rules, not the model.
+The pipeline is designed so the AI proposes and deterministic code verifies:
 
-## Model Selection
+- **Parse** — auto-detects JSON, plaintext, pytest, Docker, npm, and GitHub Actions formats.
+- **Redact** — strips secrets before any LLM call.
+- **Template mining** — Drain3 collapses repeated patterns so the model sees structure, not noise.
+- **Anomaly detection** — flags new templates, first errors, and frequency spikes.
+- **Refuse gate** — healthy logs get "nothing unusual" with no LLM call. Too little data gets "not enough signal." No wasted tokens, no hallucinated problems.
+- **LLM** — receives a compressed view under a strict token budget, returns structured JSON validated by Pydantic.
+- **Citation check** — every claim must cite an exact log line. If the quote doesn't match, the hypothesis is thrown out.
+- **Rules engine** — confidence can only go down, never up. Unknowns come from rules, not the model.
 
-logtldr uses [LiteLLM](https://github.com/BerriAI/litellm) for model routing. Any supported provider works.
+## Benchmarks
 
-### Bake-Off Results
+Evaluated on 20 cases (Kubernetes, CI/CD, infrastructure):
 
-Evaluated on 20 cases (Kubernetes, CI/CD, infrastructure): 18 diagnosis, 1 healthy-log, 1 cause-outside-logs. "Correct" means the top hypothesis matches the expected cause **and** all citations pass the validator.
-
-| Model | Accuracy (in-log) | False Positives | Avg Latency | Cost / Summary |
+| Model | Accuracy | False Positives | Avg Latency | Cost |
 |---|---|---|---|---|
-| `ollama/qwen2.5:7b` (local) | 83% (15/18) | 0 | 46.2 s | free |
-| `ollama/llama3.1:8b` (local) | 83% (15/18) | 0 | 55.2 s | free |
+| `ollama/qwen2.5:7b` | 83% (15/18) | 0 | 46s | free |
+| `ollama/llama3.1:8b` | 83% (15/18) | 0 | 55s | free |
 
-Both models correctly refused to diagnose the healthy log (0 false positives) and correctly returned "not enough signal" on the misleading-timeout case (0 fabricated causes). JSON output was valid 100% of the time.
-
-> Numbers sourced from `eval/results/*.json`. Accuracy is measured on in-log diagnosis cases only.
-> API model results will be added once cloud evals are run.
-
-### Using a Specific Model
-
-```bash
-# Local (default) — no data leaves your machine
-logtldr app.log
-
-# Explicit local model
-logtldr --model ollama/llama3.1:8b app.log
-
-# Cloud model — requires explicit opt-in
-logtldr --model groq/llama-3.1-70b-versatile --yes app.log
-
-# Or set the env var once
-export LOGTLDR_CONFIRM_API=1
-logtldr --model gemini/gemini-1.5-flash app.log
-```
-
-Provider prefixes: `ollama/`, `groq/`, `gemini/`, `openrouter/`, `anthropic/`.
-
-## Local Mode
-
-**Local is the default.** When you run `logtldr` without `--model`, it uses `ollama/llama3.1:8b` on `localhost:11434`. No data leaves your machine.
-
-To use a cloud model, you must explicitly confirm:
-
-```bash
-logtldr --model groq/llama-3.1-70b-versatile --yes app.log
-```
-
-Or set the environment variable:
-
-```bash
-export LOGTLDR_CONFIRM_API=1
-```
-
-Without `--yes` or the env var, logtldr prints an error and exits. It never prompts interactively — piped input never blocks.
-
-| Flag / Env | Effect |
-|---|---|
-| _(none)_ | Local mode via Ollama |
-| `--local` | Force local even with `--model` |
-| `--model ollama/*` | Always local |
-| `--model groq/*` (etc.) | Requires `--yes` or `LOGTLDR_CONFIRM_API=1` |
-
-## No Secrets Are Sent
-
-Secrets are redacted **before** anything reaches a model — local or cloud. The redactor covers:
-
-- AWS access keys (`AKIA...`)
-- JWTs
-- Database URLs (`postgresql://user:pass@...`)
-- Slack tokens (`xoxb-...`)
-- Environment variable assignments (`SECRET_KEY=...`)
-- IPv4 and IPv6 addresses
-- Email addresses
-
-Stable placeholders (`token_1`, `host_1`, `email_1`) replace each secret consistently within a run, so the model can still reason about structure without seeing real values.
-
-### Verified by Tests
-
-Redaction leak tests run in CI on every push. Each pattern has 3+ test cases with real token formats. The tests assert that no secret appears in `redacted_text` after the redactor runs.
-
-See: [`tests/test_redaction_leaks.py`](tests/test_redaction_leaks.py)
-
-Additionally, the `--local` enforcement is tested with network sockets blocked (`pytest-socket`), ensuring local mode cannot accidentally reach an external API.
-
-See: [`tests/test_llm_gateway_local.py`](tests/test_llm_gateway_local.py)
-
-## Roadmap (v1.1)
-
-- **Markdown renderer** (`--markdown`) for pasting into Slack / Notion
-- **GitHub Action** — run logtldr automatically on failed CI
-- **Multi-pod mode** — merge logs from multiple pods before summarizing
-- **`--verbose`** — show the full pipeline trace
-- **Slack bot** — `/logtldr` in a channel
-- **Web UI** — upload logs in the browser
+Both models correctly identified the healthy log (no false positives) and refused to guess on ambiguous cases. JSON output was valid 100% of the time.
 
 ## Development
 
@@ -178,7 +182,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-CI runs `pytest`, `ruff`, and `mypy` on every push (Python 3.11 and 3.12).
+205 tests cover the full pipeline. CI runs pytest, ruff, and mypy on every push.
 
 ## License
 
