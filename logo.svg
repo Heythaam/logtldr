@@ -1,14 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="160" viewBox="0 0 800 160">
-  <!-- Transparent background — works on both light and dark GitHub themes -->
+  <!-- Dark background so white text is visible -->
+  <rect x="200" y="20" width="400" height="120" rx="16" fill="#12122a"/>
 
   <!-- Brand name -->
-  <text x="400" y="75" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace" font-size="56" font-weight="600" letter-spacing="0.06em">
-    <tspan fill="#ffffff">log</tspan><tspan fill="#4969ed">tldr</tspan>
+  <text x="400" y="82" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace" font-size="56" font-weight="600" letter-spacing="0.06em">
+    <tspan fill="#ffffff">log</tspan><tspan fill="#6c8cff">tldr</tspan>
   </text>
 
   <!-- Accent line -->
-  <line x1="280" y1="95" x2="520" y2="95" stroke="#4969ed" stroke-width="2.5"/>
+  <line x1="280" y1="100" x2="520" y2="100" stroke="#6c8cff" stroke-width="2.5"/>
 
   <!-- Tagline -->
-  <text x="400" y="128" text-anchor="middle" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="17" fill="#656d76" letter-spacing="0.08em">thousands of lines, five that matter</text>
+  <text x="400" y="128" text-anchor="middle" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="17" fill="#8888aa" letter-spacing="0.08em">thousands of lines, five that matter</text>
 </svg>
