@@ -3,7 +3,6 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/logtldr/"><img src="https://img.shields.io/pypi/v/logtldr?color=blue" alt="PyPI"></a>
   <a href="https://github.com/Heythaam/logtldr/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
 </p>
