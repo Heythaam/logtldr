@@ -3,7 +3,7 @@
 
   <!-- Brand name -->
   <text x="400" y="75" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace" font-size="56" font-weight="600" letter-spacing="0.06em">
-    <tspan fill="#24292f">log</tspan><tspan fill="#4969ed">tldr</tspan>
+    <tspan fill="#ffffff">log</tspan><tspan fill="#4969ed">tldr</tspan>
   </text>
 
   <!-- Accent line -->
