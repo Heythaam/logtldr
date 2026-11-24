@@ -1,6 +1,12 @@
-# logtldr
+<p align="center">
+  <img src="logo.svg" width="500" alt="logtldr">
+</p>
 
-Thousands of log lines → one-screen incident summary.
+<p align="center">
+  <a href="https://pypi.org/project/logtldr/"><img src="https://img.shields.io/pypi/v/logtldr?color=blue" alt="PyPI"></a>
+  <a href="https://github.com/Heythaam/logtldr/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
+</p>
 
 Pipe noisy logs in, get back what happened, why, and what to check next. Every claim is cited against the original lines — if the AI can't prove it from your logs, it doesn't say it.
 
