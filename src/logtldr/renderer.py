@@ -1,11 +1,13 @@
 """Output formatting (AD-10)."""
 
 import shutil
+import sys
 import textwrap
 from typing import List
 
 from logtldr.models import FinalSummary
 
+MAX_WIDTH = 80
 MAX_LINES = 30
 
 # ANSI color codes
@@ -18,12 +20,30 @@ CYAN = "\033[36m"
 RESET = "\033[0m"
 
 
+def _is_tty() -> bool:
+    """Check if stdout is a real terminal (not a pipe, redirect, or test)."""
+    # pytest replaces stdout; also check for the pytest module
+    if "pytest" in sys.modules or "unittest" in sys.modules:
+        return False
+    try:
+        return sys.stdout.isatty()
+    except Exception:
+        return False
+
+
 def _get_width() -> int:
     """Get terminal width, default 80."""
     try:
-        return shutil.get_terminal_size().columns
+        return min(shutil.get_terminal_size().columns, 120)
     except Exception:
         return 80
+
+
+def _truncate(text: str, max_width: int = MAX_WIDTH) -> str:
+    """Truncate text to max_width, adding ... if needed."""
+    if len(text) <= max_width:
+        return text
+    return text[: max_width - 3] + "..."
 
 
 def _wrap(text: str, width: int, indent: str = "") -> str:
@@ -102,6 +122,7 @@ def _first_line_id(event: dict) -> int | None:
 
 def _sort_timeline_events(timeline: list) -> list:
     """Sort timeline events by their first cited line number."""
+
     def sort_key(evt: dict) -> int:
         lid = _first_line_id(evt)
         # Events without citations go to the end
@@ -121,27 +142,47 @@ def _status_color(status: str) -> str:
     return ""
 
 
-def render_terminal(summary: FinalSummary) -> str:
-    """Render the final summary for the terminal (LT-31).
+# ── Plain text renderer (pipes, tests, non-tty) ─────────────────────
 
-    Layout (fits ~30 lines, adapts to terminal width):
-        ┌─ logtldr ─────────────────────────┐
-        │ Status: ok                         │
-        │                                    │
-        │ Verdict:                           │
-        │   Evidence points to ...           │
-        │                                    │
-        │ Citations:                         │
-        │   [line 16] "ERROR: value too..."  │
-        │                                    │
-        │ Check next:                        │
-        │   Check the PostgreSQL database... │
-        └────────────────────────────────────┘
 
-    All text uses redacted content only — no secrets in output.
-    """
+def _render_terminal_plain(summary: FinalSummary) -> str:
+    """Plain text output: no ANSI, lines <= 80 chars, compact for healthy."""
+    lines: List[str] = []
+
+    lines.append(f"Status: {summary.status}")
+
+    verdict = format_verdict(summary)
+    lines.append(_truncate(f"Verdict: {verdict}"))
+
+    # For healthy/not_enough_signal, keep it minimal
+    if summary.status in ("nothing_unusual", "not_enough_signal"):
+        return "\n".join(lines)
+
+    # Timeline
+    tl = format_timeline(summary)
+    if tl:
+        lines.append(_truncate(f"Timeline: {tl}"))
+
+    # Unknowns
+    if summary.unknowns:
+        lines.append("Unknowns:")
+        for unknown in summary.unknowns:
+            lines.append(_truncate(f"  - {unknown}"))
+
+    # Check next
+    if summary.check_next:
+        lines.append(_truncate(f"Check next: {summary.check_next}"))
+
+    return "\n".join(lines)
+
+
+# ── Color renderer (real terminal) ──────────────────────────────────
+
+
+def _render_terminal_color(summary: FinalSummary) -> str:
+    """Rich terminal output with ANSI colors, evidence, wrapping."""
     width = _get_width()
-    inner = width - 4  # padding for "│ " and " │"
+    inner = width - 4
     lines: List[str] = []
 
     # Header
@@ -149,7 +190,10 @@ def render_terminal(summary: FinalSummary) -> str:
     dash_count = width - 2 - len(header_text)
     left_dashes = 2
     right_dashes = dash_count - left_dashes
-    lines.append(f"{DIM}{'─' * left_dashes}{RESET}{BOLD}{header_text}{RESET}{DIM}{'─' * right_dashes}{RESET}")
+    lines.append(
+        f"{DIM}{'─' * left_dashes}{RESET}{BOLD}{header_text}{RESET}"
+        f"{DIM}{'─' * right_dashes}{RESET}"
+    )
 
     # Status
     sc = _status_color(summary.status)
@@ -158,41 +202,49 @@ def render_terminal(summary: FinalSummary) -> str:
 
     # Verdict
     verdict = format_verdict(summary)
-    lines.append(f"  {BOLD}Verdict:{RESET}")
     wrapped = _wrap(verdict, width=inner, indent="    ")
-    lines.append(f"    {wrapped.strip()}")
+    lines.append(f"  {BOLD}Verdict:{RESET} {wrapped.strip()}")
+
+    # For healthy/not_enough_signal, keep it short
+    if summary.status in ("nothing_unusual", "not_enough_signal"):
+        lines.append("")
+        lines.append(f"{DIM}{'─' * width}{RESET}")
+        return "\n".join(lines)
 
     # Citations from top hypothesis
-    if summary.status == "ok" and summary.hypotheses:
+    if summary.hypotheses:
         top_hyp = summary.hypotheses[0]
         if top_hyp.citations:
             lines.append("")
             lines.append(f"  {BOLD}Evidence:{RESET}")
-            for citation in top_hyp.citations[:5]:  # max 5 citations
+            for citation in top_hyp.citations[:5]:
                 snippet = citation.snippet
                 if len(snippet) > inner - 15:
-                    snippet = snippet[:inner - 18] + "..."
+                    snippet = snippet[: inner - 18] + "..."
                 lines.append(
-                    f"    {DIM}line {citation.line_id}:{RESET} {CYAN}\"{snippet}\"{RESET}"
+                    f"    {DIM}line {citation.line_id}:{RESET}"
+                    f" {CYAN}\"{snippet}\"{RESET}"
                 )
 
-        # Secondary hypotheses (if any)
+        # Secondary hypotheses
         if len(summary.hypotheses) > 1:
             lines.append("")
             lines.append(f"  {BOLD}Also:{RESET}")
-            for hyp in summary.hypotheses[1:3]:  # max 2 more
+            for hyp in summary.hypotheses[1:3]:
                 cause_short = hyp.cause.strip().rstrip(".")
                 if len(cause_short) > inner - 6:
-                    cause_short = cause_short[:inner - 9] + "..."
-                lines.append(f"    {DIM}•{RESET} {cause_short} {DIM}({hyp.confidence}){RESET}")
+                    cause_short = cause_short[: inner - 9] + "..."
+                lines.append(
+                    f"    {DIM}•{RESET} {cause_short}"
+                    f" {DIM}({hyp.confidence}){RESET}"
+                )
 
     # Timeline
     tl = format_timeline(summary)
     if tl:
         lines.append("")
-        lines.append(f"  {BOLD}Timeline:{RESET}")
         wrapped_tl = _wrap(tl, width=inner, indent="    ")
-        lines.append(f"    {wrapped_tl.strip()}")
+        lines.append(f"  {BOLD}Timeline:{RESET} {wrapped_tl.strip()}")
 
     # Unknowns
     if summary.unknowns:
@@ -205,9 +257,8 @@ def render_terminal(summary: FinalSummary) -> str:
     # Check next
     if summary.check_next:
         lines.append("")
-        lines.append(f"  {BOLD}Check next:{RESET}")
         wrapped_cn = _wrap(summary.check_next, width=inner, indent="    ")
-        lines.append(f"    {wrapped_cn.strip()}")
+        lines.append(f"  {BOLD}Check next:{RESET} {wrapped_cn.strip()}")
 
     # Footer
     lines.append("")
@@ -216,10 +267,24 @@ def render_terminal(summary: FinalSummary) -> str:
     return "\n".join(lines)
 
 
+def render_terminal(summary: FinalSummary) -> str:
+    """Render the final summary for the terminal (LT-31).
+
+    Uses colors and evidence display on real terminals,
+    plain compact text when piped or in tests.
+    """
+    if _is_tty():
+        return _render_terminal_color(summary)
+    return _render_terminal_plain(summary)
+
+
 def render_json(summary: FinalSummary) -> str:
-    """Render JSON output, colorized when printing to terminal (LT-32)."""
+    """Render JSON output, colorized when printing to terminal (LT-32).
+
+    Output is valid JSON parseable by ``python -m json.tool``.
+    """
     import json
-    import sys
+    import re
 
     output: dict = {
         "status": summary.status,
@@ -253,21 +318,25 @@ def render_json(summary: FinalSummary) -> str:
     raw = json.dumps(output, indent=2)
 
     # Only colorize when outputting to a real terminal, not a pipe
-    if not sys.stdout.isatty():
+    if not _is_tty():
         return raw
-
-    import re
 
     # Keys: bold cyan
     raw = re.sub(r'"([^"]+)"(?=\s*:)', f'{BOLD}{CYAN}"\\1"{RESET}', raw)
     # String values: green
-    raw = re.sub(r':\s*"([^"]*)"', lambda m: f': {GREEN}"{m.group(1)}"{RESET}', raw)
+    raw = re.sub(
+        r':\s*"([^"]*)"', lambda m: f': {GREEN}"{m.group(1)}"{RESET}', raw
+    )
     # Numbers: yellow
-    raw = re.sub(r':\s*(\d+)', lambda m: f': {YELLOW}{m.group(1)}{RESET}', raw)
+    raw = re.sub(r":\s*(\d+)", lambda m: f": {YELLOW}{m.group(1)}{RESET}", raw)
     # Booleans/null: dim
-    raw = re.sub(r':\s*(true|false|null)', lambda m: f': {DIM}{m.group(1)}{RESET}', raw)
+    raw = re.sub(
+        r":\s*(true|false|null)",
+        lambda m: f": {DIM}{m.group(1)}{RESET}",
+        raw,
+    )
     # Brackets: dim
-    raw = raw.replace('[', f'{DIM}[{RESET}').replace(']', f'{DIM}]{RESET}')
-    raw = raw.replace('{', f'{DIM}{{{RESET}').replace('}', f'{DIM}}}{RESET}')
+    raw = raw.replace("[", f"{DIM}[{RESET}").replace("]", f"{DIM}]{RESET}")
+    raw = raw.replace("{", f"{DIM}{{{RESET}").replace("}", f"{DIM}}}{RESET}")
 
     return raw

@@ -54,11 +54,13 @@ def test_models_importable() -> None:
     assert FinalSummary(status="ok").unknowns == []
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_cli_reads_stdin(
     mock_completion: MagicMock,
-    mock_httpx: MagicMock,        # ADD THIS
+    mock_httpx: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -92,11 +94,13 @@ def test_cli_reads_stdin(
     assert "Evidence points to boom happened, confidence: medium" in out
 
 
+@patch("logtldr.main._load_config_file", return_value={})
 @patch("httpx.get", return_value=MagicMock(status_code=200))
 @patch("litellm.completion")
 def test_cli_json_mode(
     mock_completion: MagicMock,
     mock_httpx: MagicMock,
+    mock_config: MagicMock,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -121,7 +125,7 @@ def test_cli_json_mode(
     lines = [f"2024-01-15T10:00:00Z INFO line {i}" for i in range(54)]
     lines.append("2024-01-15T10:00:00Z ERROR boom")
     input_text = "\n".join(lines)
-    
+
     monkeypatch.setattr("sys.stdin", io.StringIO(input_text))
     rc = main(["--json"])
     assert rc == 0

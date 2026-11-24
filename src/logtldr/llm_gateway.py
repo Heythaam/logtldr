@@ -1,12 +1,11 @@
 """LiteLLM integration (AD-4)."""
 
-import json
 from typing import Any, TypeVar
 from urllib.parse import urlparse
 
 import httpx
 import litellm
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from logtldr.config import Config
 from logtldr.models import CompressedView
@@ -73,7 +72,6 @@ class LLMGateway:
 
 
 
-
     def call_summarize(self, compressed_view: CompressedView, schema: type[T]) -> T:
         messages = build_messages(compressed_view)
         is_ollama = self.model.startswith("ollama/")
@@ -82,7 +80,7 @@ class LLMGateway:
             raw_text = None
             try:
                 if is_ollama:
-                    # Ollama: skip json_schema (it always fails), go straight to JSON mode
+                    # Ollama: skip json_schema (always fails), go straight to JSON mode
                     response = litellm.completion(
                         model=self.model,
                         messages=messages,
@@ -120,9 +118,20 @@ class LLMGateway:
             except Exception as exc:
                 if attempt == 2:
                     raise RuntimeError(
-                        f"LLM summarisation failed after 3 attempts: {exc}"
+                        f"LLM returned invalid JSON after 3 attempts: {exc}"
                     ) from exc
+                # Feed the bad reply back so the LLM can self-correct
+                if raw_text is not None:
+                    messages = messages + [
+                        {"role": "assistant", "content": raw_text},
+                        {"role": "user", "content": "That was not valid JSON. Return only valid JSON matching the schema."},
+                    ]
 
+        # Unreachable, but keeps mypy happy
+        raise RuntimeError("LLM returned invalid JSON after 3 attempts")
+
+
+    
     def _get_ollama_params(self) -> dict[str, Any]:
         """Ollama-specific parameters."""
         if "ollama" in self.model:
