@@ -4,7 +4,8 @@ import argparse
 import json
 import os
 import sys
-from importlib.metadata import PackageNotFoundError, version as pkg_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as pkg_version
 from pathlib import Path
 from typing import NoReturn, Optional
 
@@ -26,7 +27,6 @@ from logtldr.redaction import redact
 from logtldr.refuse_gate import check_refuse_gate
 from logtldr.renderer import render_json, render_terminal
 from logtldr.rules_engine import apply_rules
-
 
 # ── Config file ──────────────────────────────────────────────────────
 
