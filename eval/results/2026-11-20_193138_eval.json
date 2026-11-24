@@ -1,0 +1,182 @@
+{
+  "accuracy": 0.2222,
+  "diagnosis": {
+    "correct": 1,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "DataNode$DataXceiver encountered exceptions while serving blocks to remote nodes; the logs do not include the underlying exception details.",
+      "verdict": "Multiple DataNode DataXceiver components logged WARNs indicating exceptions while serving blocks to peer nodes; this occurred repeatedly across different blocks and nodes, suggesting intermittent network or disk issues during block replication."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "quorum",
+        "election"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "500",
+        "backend"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "authentication",
+        "fail"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "assert",
+        "test_multiply",
+        "fail"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "kill",
+        "memory"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "peer",
+        "dependency",
+        "react"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "disk",
+        "space"
+      ],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: GroqException - {\"error\":{\"message\":\"Invalid API Key\",\"type\":\"invalid_request_error\",\"code\":\"invalid_api_key\"}}\n"
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

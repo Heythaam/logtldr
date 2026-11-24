@@ -1,0 +1,8 @@
+status: "ok"
+cause: "CoreDNS pods crashed (no nameservers found), causing cluster-wide DNS resolution failures"
+cause_keywords: ["DNS", "coredns"]
+cause_type: "direct"
+evidence_line_ids: [148, 149, 150, 151, 152, 153, 154, 155, 156]
+expected_format: "plaintext"
+expected_unknowns:
+  - "why CoreDNS lost its upstream nameservers (node /etc/resolv.conf change, network policy, or upstream DNS outage) is not visible here"

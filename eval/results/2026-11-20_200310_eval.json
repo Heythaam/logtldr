@@ -1,0 +1,165 @@
+{
+  "accuracy": 0.6667,
+  "diagnosis": {
+    "correct": 5,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "exception"
+      ],
+      "reason": "missing keywords: exception",
+      "actual_cause": "Block transfer failures during serving blocks by DataNode$DataXceiver",
+      "verdict": "Block transfer failures are occurring on multiple DataNodes, as indicated by WARN messages about exceptions while serving blocks. The logs show many such warnings but do not reveal the underlying exception details."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "terminat"
+      ],
+      "reason": "missing keywords: terminat",
+      "actual_cause": "SendWorker threads are exiting unexpectedly, likely due to network or resource issues; the logs do not include the underlying exception.",
+      "verdict": "The ZooKeeper cluster is experiencing frequent SendWorker thread exits, with 262 WARNs over the log period, and a single unexpected exception from CommitProcessor; the logs do not show why the workers exit or the details of the exception."
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "error"
+      ],
+      "reason": "missing keywords: error",
+      "actual_cause": "mod_jk worker environment is failing, likely due to worker process crashes or misconfiguration",
+      "verdict": "mod_jk worker processes repeatedly enter an error state (e.g., \"mod_jk child workerEnv in error state 6\"), causing request handling failures; this pattern occurs hundreds of times but the logs do not reveal the root cause."
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Repeated SSH authentication failures due to automated login attempts (brute force) from ip_20 and ip_11, causing the server to disconnect clients after exhausting authentication methods.",
+      "verdict": "The SSH service is experiencing a high volume of failed authentication attempts from IP addresses ip_20 and ip_11, leading to many disconnects and a spike in error logs."
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "multiply function returns incorrect result for inputs 3 and 4; the test expects 12 but got 11",
+      "verdict": "The test for multiply failed because multiply(3,4) returned 11 instead of 12; this happened once in the test suite."
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "pip install process killed during Docker build, likely due to out\u2011of\u2011memory or resource limit",
+      "verdict": "During the Docker build, the pip install step was killed (exit code 137), causing the build to fail. This happened once in the 13 lines sampled."
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "npm install failed because react@18.2.0 is incompatible with react-dom@17.0.2, leading to an ERESOLVE dependency conflict",
+      "verdict": "npm install failed due to a peer dependency conflict between react@18.2.0 and react-dom@17.0.2, causing an ERESOLVE error; this occurred once in the log."
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Disk space exhaustion on /home/runner/.npm/_cacache during npm install/build caused npm to error and the job to fail.",
+      "verdict": "The job failed because the runner ran out of disk space while writing npm cache artifacts, causing npm to error and the job to exit with code 1."
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

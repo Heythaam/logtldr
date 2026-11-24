@@ -1,0 +1,14 @@
+2024-01-15T10:00:00Z INFO  [postgres] LOG:  database system is ready to accept connections
+2024-01-15T10:00:01Z INFO  [postgres] LOG:  autovacuum launcher started
+2024-01-15T10:00:10Z INFO  [postgres] LOG:  statement: BEGIN; UPDATE orders SET status='processing' WHERE id=1001;
+2024-01-15T10:00:10Z INFO  [postgres] LOG:  statement: BEGIN; UPDATE inventory SET qty=qty-1 WHERE sku='WIDGET-A';
+2024-01-15T10:00:11Z WARN  [postgres] LOG:  process 5432 still waiting for ShareLock on transaction 90210 after 1000.123 ms
+2024-01-15T10:00:11Z WARN  [postgres] DETAIL:  Process holding the lock: 5433. Wait queue: 5432.
+2024-01-15T10:00:11Z ERROR [postgres] LOG:  deadlock detected
+2024-01-15T10:00:11Z ERROR [postgres] DETAIL:  Process 5432 waits for ShareLock on transaction 90210; blocked by process 5433. Process 5433 waits for ShareLock on transaction 90211; blocked by process 5432.
+2024-01-15T10:00:11Z ERROR [postgres] HINT:  See server log for query details.
+2024-01-15T10:00:11Z ERROR [postgres] LOG:  statement: UPDATE inventory SET qty=qty-1 WHERE sku='WIDGET-A';
+2024-01-15T10:00:11Z INFO  [postgres] LOG:  process 5432: canceling statement due to deadlock, rolling back transaction
+2024-01-15T10:00:12Z INFO  [app-svc] Order 1001 failed: could not serialize access due to concurrent update
+2024-01-15T10:00:12Z WARN  [app-svc] Retrying order 1001 processing
+2024-01-15T10:00:13Z INFO  [app-svc] Order 1001 processed successfully on retry

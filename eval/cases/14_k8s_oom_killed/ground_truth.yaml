@@ -1,0 +1,8 @@
+status: "ok"
+cause: "ml-training-job-0 container trainer OOM killed: memory exceeded 2Gi limit (exit code 137)"
+cause_keywords: ["OOM", "memory"]
+cause_type: "direct"
+evidence_line_ids: [159, 160, 161, 162, 163, 164, 165]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the memory limit is too low or the workload has a memory leak requires profiling"

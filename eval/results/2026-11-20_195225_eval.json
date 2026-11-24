@@ -1,0 +1,163 @@
+{
+  "accuracy": 0.7778,
+  "diagnosis": {
+    "correct": 6,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Block transfer failures in DataNode DataXceiver; blocks served to remote nodes encountered exceptions.",
+      "verdict": "Multiple DataNode block transfer failures were observed; 80 WARNs indicate exceptions while serving blocks to peers, suggesting network or disk issues during replication."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "exit"
+      ],
+      "reason": "missing keywords: exit",
+      "actual_cause": "Repeated termination of SendWorker threads in ZooKeeper quorum communication, likely due to network interruptions or thread interruptions.",
+      "verdict": "ZooKeeper nodes are repeatedly logging \"Send worker leaving thread\" warnings (262 occurrences), indicating frequent termination of send worker threads during quorum communication; a single unexpected exception in CommitProcessor is also logged, but its cause is not shown."
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "mod_jk worker environment is failing, causing child workers to crash or not start, leading to repeated \"mod_jk child workerEnv in error state\" and \"jk2_init() Can't find child\" errors.",
+      "verdict": "The log shows that the mod_jk worker environment repeatedly enters an error state (539 occurrences) and child workers cannot be found (12 occurrences), indicating a persistent failure of the mod_jk worker processes. Additionally, there are occasional directory index forbidden errors (32 occurrences)."
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Repeated SSH authentication failures from ip_20 and ip_11 leading to disconnects due to exhaustion of allowed authentication methods",
+      "verdict": "The logs show repeated SSH authentication failures and disconnects from IPs ip_20 and ip_11, likely due to brute\u2011force login attempts exhausting allowed authentication methods; a few client\u2011side errors (JSchException) and a connection reset by peer are also recorded."
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "11"
+      ],
+      "reason": "missing keywords: 11",
+      "actual_cause": "The multiply function returns an incorrect result for inputs 3 and 4, causing the assertion to fail.",
+      "verdict": "The test `test_multiply` failed because the `multiply` function returned 11 instead of the expected 12. This is the only failure in the test run."
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "The pip install process was killed by the system (exit code 137), likely due to an out\u2011of\u2011memory condition.",
+      "verdict": "During the Docker build, the pip install step was killed (exit code 137), causing the build to fail. This happened once in the 13-line sample, indicating a resource limit (likely OOM) during the installation of torch and numpy."
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "npm install failed due to incompatible peer dependency between react 18.2.0 and react-dom 17.0.2",
+      "verdict": "npm install failed because of a peer dependency conflict: react-dom@17.0.2 requires react ^17.0.0, but the root project uses react 18.2.0, causing npm to emit an ERESOLVE error."
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Disk space exhausted during npm install, leading to ENOSPC errors and job failure",
+      "verdict": "The job failed because npm install ran out of disk space on /home/runner/.npm/_cacache, producing ENOSPC errors and causing the runner to shut down with exit code 1."
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

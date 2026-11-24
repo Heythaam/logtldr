@@ -1,0 +1,16 @@
+2024-01-15T10:00:00Z INFO  [checkout-svc] Starting checkout for order_id=ORD-9281
+2024-01-15T10:00:01Z INFO  [checkout-svc] Calling payment gateway POST /v1/charge amount=149.99
+2024-01-15T10:00:06Z ERROR [checkout-svc] Payment gateway timeout after 5000ms (attempt 1/3)
+2024-01-15T10:00:06Z WARN  [checkout-svc] Retrying payment gateway POST /v1/charge (attempt 2/3)
+2024-01-15T10:00:11Z ERROR [checkout-svc] Payment gateway timeout after 5000ms (attempt 2/3)
+2024-01-15T10:00:11Z WARN  [checkout-svc] Retrying payment gateway POST /v1/charge (attempt 3/3)
+2024-01-15T10:00:16Z ERROR [checkout-svc] Payment gateway timeout after 5000ms (attempt 3/3)
+2024-01-15T10:00:16Z ERROR [checkout-svc] All retries exhausted for order_id=ORD-9281
+2024-01-15T10:00:16Z INFO  [checkout-svc] Starting checkout for order_id=ORD-9282
+2024-01-15T10:00:17Z INFO  [checkout-svc] Calling payment gateway POST /v1/charge amount=29.99
+2024-01-15T10:00:22Z ERROR [checkout-svc] Payment gateway timeout after 5000ms (attempt 1/3)
+2024-01-15T10:00:22Z WARN  [checkout-svc] Retrying payment gateway POST /v1/charge (attempt 2/3)
+2024-01-15T10:00:27Z ERROR [checkout-svc] Payment gateway timeout after 5000ms (attempt 2/3)
+2024-01-15T10:00:27Z WARN  [checkout-svc] Retrying payment gateway POST /v1/charge (attempt 3/3)
+2024-01-15T10:00:32Z ERROR [checkout-svc] Payment gateway timeout after 5000ms (attempt 3/3)
+2024-01-15T10:00:32Z ERROR [checkout-svc] All retries exhausted for order_id=ORD-9282

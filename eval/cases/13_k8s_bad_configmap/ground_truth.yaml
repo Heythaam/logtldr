@@ -1,0 +1,8 @@
+status: "ok"
+cause: "payment-svc crash: ConfigMap payment-db-config not found, /etc/config/database.yaml missing"
+cause_keywords: ["configmap", "not found"]
+cause_type: "direct"
+evidence_line_ids: [205, 206, 210, 211, 212]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the ConfigMap was deleted, renamed, or never created is not visible in event logs"

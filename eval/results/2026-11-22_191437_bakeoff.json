@@ -1,0 +1,1163 @@
+[
+  {
+    "model": "ollama/llama3.1:8b",
+    "accuracy": 0.8421,
+    "diagnosis": {
+      "correct": 15,
+      "total": 18
+    },
+    "healthy": {
+      "correct": 1,
+      "total": 1,
+      "false_positives": 0
+    },
+    "unknown": {
+      "correct": 1,
+      "total": 1,
+      "fabricated": 0
+    },
+    "json_errors": 0,
+    "json_valid_pct": 100.0,
+    "avg_latency_s": 55.2,
+    "total_latency_s": 1103.4,
+    "latencies": [
+      57.6,
+      54.0,
+      32.1,
+      95.8,
+      75.2,
+      47.5,
+      56.2,
+      70.6,
+      0.0,
+      0.0,
+      69.7,
+      60.8,
+      74.5,
+      73.3,
+      58.8,
+      82.6,
+      42.7,
+      46.0,
+      40.8,
+      65.1
+    ],
+    "cases": [
+      {
+        "case_id": "01_hdfs_datanode_error",
+        "kind": "diagnosis",
+        "actual_status": "not_enough_signal",
+        "correct": false,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [
+          78,
+          79,
+          81,
+          89
+        ],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "expected a diagnosis, got status='not_enough_signal'",
+        "actual_cause": null,
+        "verdict": "DataNode$DataXceiver is experiencing exceptions while serving blocks, roughly 80 times, across multiple hosts, the reason is not in the logs."
+      },
+      {
+        "case_id": "02_zookeeper_quorum_lost",
+        "kind": "diagnosis",
+        "actual_status": "not_enough_signal",
+        "correct": false,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [
+          1,
+          3,
+          63,
+          506,
+          571,
+          641
+        ],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "expected a diagnosis, got status='not_enough_signal'",
+        "actual_cause": null,
+        "verdict": "Send workers are leaving threads frequently, causing 1318 WARN messages in the last 2000 lines, with a peak of 21 occurrences in a short time span. The logs do not include the underlying reason."
+      },
+      {
+        "case_id": "03_apache_500_errors",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          2,
+          796
+        ],
+        "evidence_expected": [
+          2,
+          12,
+          15,
+          20,
+          796
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "mod_jk child workerEnv is in error state; the logs do not include the underlying exception.",
+        "verdict": "mod_jk child workerEnv is in error state roughly 539 times, and the reason is not in the logs."
+      },
+      {
+        "case_id": "04_linux_auth_failures",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          158,
+          347,
+          1869
+        ],
+        "evidence_expected": [
+          6,
+          29,
+          30,
+          31,
+          32,
+          158,
+          347,
+          1869
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "SSH authentication failures; the logs do not include the underlying reason",
+        "verdict": "SSH authentication failures are occurring frequently, with 414 occurrences in the past 4 hours, involving multiple IP addresses and users. The logs do not include the underlying reason for these failures."
+      },
+      {
+        "case_id": "05_pytest_assertion_failure",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": false,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          17,
+          18
+        ],
+        "evidence_expected": [
+          8,
+          14,
+          15,
+          17,
+          18,
+          19
+        ],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "incorrect"
+        ],
+        "reason": "top hypothesis has missing or invalid citations; soft: missing keywords: incorrect",
+        "actual_cause": "The test_multiply function in tests/test_math.py is failing.",
+        "verdict": "The test_multiply function in tests/test_math.py is failing, with 4 occurrences of this failure, affecting 1 distinct component (tests/test_math.py), over a time span of 0.05s. The logs do not include the underlying exception."
+      },
+      {
+        "case_id": "06_docker_build_oom",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          12,
+          13
+        ],
+        "evidence_expected": [
+          10,
+          11,
+          12,
+          13
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "memory"
+        ],
+        "reason": "soft: missing keywords: memory",
+        "actual_cause": "The Docker build process is failing to install dependencies, specifically pip install -r requirements.txt, due to a Killed error and a failed executor.",
+        "verdict": "The Docker build process is failing to install dependencies, specifically pip install -r requirements.txt, due to a Killed error and a failed executor. This happened twice, and the logs do not include the underlying exception."
+      },
+      {
+        "case_id": "07_npm_peer_dep_conflict",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          4,
+          12,
+          13
+        ],
+        "evidence_expected": [
+          4,
+          12,
+          13
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "npm dependency resolution failed, likely due to peer dependency conflicts",
+        "verdict": "npm package installation failed 16 times, likely due to dependency resolution issues; the logs do not include the underlying exception."
+      },
+      {
+        "case_id": "08_github_actions_disk_full",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          7,
+          8,
+          9
+        ],
+        "evidence_expected": [
+          7,
+          8,
+          9
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The build process is failing due to a lack of disk space.",
+        "verdict": "The build process is failing due to a lack of disk space; the logs do not include the underlying exception."
+      },
+      {
+        "case_id": "09_healthy_ci_run",
+        "kind": "healthy",
+        "actual_status": "nothing_unusual",
+        "correct": true,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": null,
+        "verdict": "Refused by gate"
+      },
+      {
+        "case_id": "10_misleading_timeout",
+        "kind": "unknown",
+        "actual_status": "not_enough_signal",
+        "correct": true,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": null,
+        "verdict": "Refused by gate"
+      },
+      {
+        "case_id": "11_k8s_pod_crashloop",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          153,
+          158,
+          163,
+          165
+        ],
+        "evidence_expected": [
+          153,
+          154,
+          158,
+          159,
+          163,
+          164,
+          165
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "CrashLoopBackOff"
+        ],
+        "reason": "soft: missing keywords: CrashLoopBackOff",
+        "actual_cause": "The container postgres exited with code <<NUM>>: FATAL: password authentication failed for user \"appuser\".",
+        "verdict": "The postgres-primary-0 pod is experiencing repeated restarts due to a failed container, with the reason being password authentication failed for user \"appuser\"."
+      },
+      {
+        "case_id": "12_k8s_disk_pressure",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          172,
+          175
+        ],
+        "evidence_expected": [
+          168,
+          169,
+          170,
+          172,
+          173,
+          175,
+          176,
+          177,
+          180,
+          181
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "disk"
+        ],
+        "reason": "soft: missing keywords: disk",
+        "actual_cause": "ephemeral-storage usage exceeded threshold, causing pods to be evicted",
+        "verdict": "The node was low on ephemeral-storage, causing pods to be evicted. This happened 2 times, affecting 2 distinct pods."
+      },
+      {
+        "case_id": "13_k8s_bad_configmap",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          205,
+          206,
+          210,
+          211
+        ],
+        "evidence_expected": [
+          205,
+          206,
+          210,
+          211,
+          212
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "A container is failing to start due to a missing file.",
+        "verdict": "A container is failing to start due to a missing file, and a pod is failing to mount a volume due to a missing configmap. This is happening to a pod named payment-svc-7c5d8f9b4-x2k9p, and it has happened 5 times in total."
+      },
+      {
+        "case_id": "14_k8s_oom_killed",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          163,
+          164
+        ],
+        "evidence_expected": [
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "OOM killing of the trainer container in the ml-training-job pod due to memory exhaustion.",
+        "verdict": "The trainer container in the ml-training-job pod is running out of memory and being OOM killed, roughly every 2 minutes, on multiple nodes. The logs do not include the underlying exception."
+      },
+      {
+        "case_id": "15_k8s_dns_failure",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          148,
+          149
+        ],
+        "evidence_expected": [
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The readiness probe for the coredns pod is failing.",
+        "verdict": "The readiness probe for the coredns pod is failing, causing 2 warnings in the kube-system namespace. The logs do not include the underlying exception."
+      },
+      {
+        "case_id": "16_k8s_imagepull_backoff",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          157
+        ],
+        "evidence_expected": [
+          156,
+          157,
+          158,
+          160,
+          161,
+          162,
+          165
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "ImagePull"
+        ],
+        "reason": "soft: missing keywords: ImagePull",
+        "actual_cause": "Failed to pull image \"myregistry.io/notification-svc:v3.<<NUM>>.<<NUM>>-rc1\": rpc error: code = NotFound desc = failed to pull and unpack image \"myregistry.io/notification-svc:v3.<<NUM>>.<<NUM>>-rc1\": failed to resolve reference \"myregistry.io/notification-svc:v3.<<NUM>>.<<NUM>>-rc1\": myregistry.io/notification-svc:v3.<<NUM>>.<<NUM>>-rc1: not found",
+        "verdict": "Image pulling failed for pod notification-svc-5d9f8c7b3-k2m1p, roughly 4 times, on node-<<NUM>>; the logs do not include the underlying exception."
+      },
+      {
+        "case_id": "17_k8s_liveness_probe_fail",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          135,
+          136,
+          137
+        ],
+        "evidence_expected": [
+          135,
+          136,
+          137,
+          138,
+          142,
+          143,
+          144,
+          145
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "Liveness probe failures in pod checkout-svc-9d7f8c6b4-z3m1p",
+        "verdict": "A pod named checkout-svc-9d7f8c6b4-z3m1p is experiencing liveness probe failures, resulting in 6 warnings over a 10-minute period. The logs do not include the underlying reason for the failure."
+      },
+      {
+        "case_id": "18_k8s_resource_quota",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          142,
+          143,
+          144
+        ],
+        "evidence_expected": [
+          137,
+          142,
+          143,
+          144,
+          145,
+          148
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "exceeded quota, requested resources exceed available quota",
+        "verdict": "Kubernetes pods are failing to create due to exceeded quota, roughly 4 times in the last 2 minutes, and the reason is that the requested resources exceed the available quota."
+      },
+      {
+        "case_id": "19_k8s_pvc_mount_fail",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          187
+        ],
+        "evidence_expected": [
+          187,
+          188,
+          189,
+          190,
+          193,
+          194,
+          195
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "PVC"
+        ],
+        "reason": "soft: missing keywords: PVC",
+        "actual_cause": "Volume attachment issues during Elasticsearch data pod mount operations",
+        "verdict": "Elasticsearch data pod mount operations are failing due to volume attachment issues, occurring 2 times, affecting 1 pod, and the logs do not include the underlying exception."
+      },
+      {
+        "case_id": "20_k8s_node_not_ready",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          172
+        ],
+        "evidence_expected": [
+          172,
+          173,
+          174,
+          175,
+          176,
+          178,
+          179,
+          180,
+          181
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The container runtime network is not ready on multiple nodes, causing errors in the kubelet.",
+        "verdict": "The container runtime network is not ready on multiple nodes, causing errors in the kubelet. This happened 3 times on 1 node, and 1 time on another node."
+      }
+    ]
+  },
+  {
+    "model": "ollama/qwen2.5:7b",
+    "accuracy": 0.8421,
+    "diagnosis": {
+      "correct": 15,
+      "total": 18
+    },
+    "healthy": {
+      "correct": 1,
+      "total": 1,
+      "false_positives": 0
+    },
+    "unknown": {
+      "correct": 1,
+      "total": 1,
+      "fabricated": 0
+    },
+    "json_errors": 0,
+    "json_valid_pct": 100.0,
+    "avg_latency_s": 46.2,
+    "total_latency_s": 923.1,
+    "latencies": [
+      35.4,
+      54.8,
+      40.8,
+      52.3,
+      49.2,
+      25.8,
+      47.4,
+      43.0,
+      0.0,
+      0.0,
+      45.1,
+      41.9,
+      56.0,
+      47.8,
+      61.5,
+      40.4,
+      63.6,
+      82.5,
+      30.0,
+      105.3
+    ],
+    "cases": [
+      {
+        "case_id": "01_hdfs_datanode_error",
+        "kind": "diagnosis",
+        "actual_status": "success",
+        "correct": false,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [
+          78,
+          79,
+          81,
+          89
+        ],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "expected a diagnosis, got status='success'",
+        "actual_cause": null,
+        "verdict": null
+      },
+      {
+        "case_id": "02_zookeeper_quorum_lost",
+        "kind": "diagnosis",
+        "actual_status": "not_enough_signal",
+        "correct": false,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [
+          1,
+          3,
+          63,
+          506,
+          571,
+          641
+        ],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "expected a diagnosis, got status='not_enough_signal'",
+        "actual_cause": null,
+        "verdict": "The system is experiencing frequent warnings about send and receive workers leaving their threads, and a spike in connection breaks. There is also a rare error related to unexpected exceptions."
+      },
+      {
+        "case_id": "03_apache_500_errors",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          2,
+          796
+        ],
+        "evidence_expected": [
+          2,
+          12,
+          15,
+          20,
+          796
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The worker environment is entering an error state, likely due to misconfiguration or resource issues.",
+        "verdict": "The application is experiencing frequent worker environment errors, with 539 occurrences of 'mod_jk child workerEnv in error state <<NUM>>'. The first such error was reported at 04:47:44 on December 4, 2005."
+      },
+      {
+        "case_id": "04_linux_auth_failures",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          158,
+          347,
+          1869
+        ],
+        "evidence_expected": [
+          6,
+          29,
+          30,
+          31,
+          32,
+          158,
+          347,
+          1869
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "SSH authentication failures and disconnections; the logs do not include the underlying exception.",
+        "verdict": "The SSH service is experiencing frequent authentication failures and disconnections, particularly from IP addresses 11 and 20. There are also rare errors indicating authentication failures and a fatal error of connection reset by peer."
+      },
+      {
+        "case_id": "05_pytest_assertion_failure",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          17
+        ],
+        "evidence_expected": [
+          8,
+          14,
+          15,
+          17,
+          18,
+          19
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "incorrect"
+        ],
+        "reason": "soft: missing keywords: incorrect",
+        "actual_cause": "The test_multiply function is asserting that the result of multiply(3, 4) is 12, but the actual result is 11, leading to an AssertionError.",
+        "verdict": "The test_multiply function in tests/test_math.py is failing, as indicated by the 40% test session completion followed by a FAILED message for this test. This failure is consistent across multiple runs, as evidenced by the recurring pattern in template_id 9. The cause is an AssertionError, as shown in the error message and traceback."
+      },
+      {
+        "case_id": "06_docker_build_oom",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          12,
+          13
+        ],
+        "evidence_expected": [
+          10,
+          11,
+          12,
+          13
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "memory"
+        ],
+        "reason": "soft: missing keywords: memory",
+        "actual_cause": "The Docker container was terminated due to a resource limit, causing the pip install command to fail with exit code 137.",
+        "verdict": "The Docker build process was interrupted, likely due to a resource constraint, as indicated by the 'Killed' and 'exit code: 137' errors. This occurred once during the installation of dependencies."
+      },
+      {
+        "case_id": "07_npm_peer_dep_conflict",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          4,
+          12,
+          13
+        ],
+        "evidence_expected": [
+          4,
+          12,
+          13
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The npm install process encountered a dependency resolution conflict, leading to an ERESOLVE error.",
+        "verdict": "The npm install process failed due to a dependency resolution issue, specifically an ERESOLVE error, which is preventing the installation of the myapp package. This error occurred once and involved a conflict between the required react version and the react-dom version."
+      },
+      {
+        "case_id": "08_github_actions_disk_full",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          7,
+          8,
+          9
+        ],
+        "evidence_expected": [
+          7,
+          8,
+          9
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The build process failed because the disk was full when writing build artifacts, leading to an ENOSPC error.",
+        "verdict": "The build process failed due to a lack of disk space, specifically when writing build artifacts to /home/runner/.npm/_cacache. This issue occurred once, affecting the entire build process, which was then shut down."
+      },
+      {
+        "case_id": "09_healthy_ci_run",
+        "kind": "healthy",
+        "actual_status": "nothing_unusual",
+        "correct": true,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": null,
+        "verdict": "Refused by gate"
+      },
+      {
+        "case_id": "10_misleading_timeout",
+        "kind": "unknown",
+        "actual_status": "not_enough_signal",
+        "correct": true,
+        "evidence_overlap": false,
+        "evidence_matched": [],
+        "evidence_expected": [],
+        "citations_valid": false,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": null,
+        "verdict": "Refused by gate"
+      },
+      {
+        "case_id": "11_k8s_pod_crashloop",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          153
+        ],
+        "evidence_expected": [
+          153,
+          154,
+          158,
+          159,
+          163,
+          164,
+          165
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "CrashLoopBackOff"
+        ],
+        "reason": "soft: missing keywords: CrashLoopBackOff",
+        "actual_cause": "The PostgreSQL container is failing to start due to password authentication issues, causing the pod to be repeatedly restarted.",
+        "verdict": "The PostgreSQL primary pod is experiencing repeated backoffs and failures, indicating an issue with the pod's container, likely related to authentication."
+      },
+      {
+        "case_id": "12_k8s_disk_pressure",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          172,
+          175
+        ],
+        "evidence_expected": [
+          168,
+          169,
+          170,
+          172,
+          173,
+          175,
+          176,
+          177,
+          180,
+          181
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "disk"
+        ],
+        "reason": "soft: missing keywords: disk",
+        "actual_cause": "The node's ephemeral storage is running low, causing the kubelet to evict pods to free up space.",
+        "verdict": "The system is experiencing ephemeral storage pressure, leading to pod evictions and node status changes. This issue is recurring, affecting multiple pods and nodes."
+      },
+      {
+        "case_id": "13_k8s_bad_configmap",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": false,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          205,
+          206,
+          210
+        ],
+        "evidence_expected": [
+          205,
+          206,
+          210,
+          211,
+          212
+        ],
+        "citations_valid": false,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "top hypothesis has missing or invalid citations",
+        "actual_cause": "The payment-svc container is exiting with a FileNotFoundError due to a missing configuration file, and the configmap for the configuration is not found.",
+        "verdict": "The payment-svc pod is failing due to a missing configuration file and a missing configmap, occurring twice."
+      },
+      {
+        "case_id": "14_k8s_oom_killed",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          163,
+          164
+        ],
+        "evidence_expected": [
+          159,
+          160,
+          161,
+          162,
+          163,
+          164,
+          165
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The trainer container in the ml-training-job-0 pod exceeded its memory limit, leading to an OOM kill.",
+        "verdict": "The system is experiencing an out-of-memory (OOM) issue with the trainer container in the ml-training-job-0 pod, causing it to be OOM killed and subsequently backoff restarting."
+      },
+      {
+        "case_id": "15_k8s_dns_failure",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          148,
+          150
+        ],
+        "evidence_expected": [
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The coredns pod is failing its readiness probe, causing Kubernetes to back-off and restart the container. The errors indicate that the probe failed with a status code of 503, and the container exited with an error related to missing nameservers.",
+        "verdict": "The coredns pod is experiencing issues with its readiness probe, leading to back-off restarts and errors. This is a recurring problem, affecting at least two pods."
+      },
+      {
+        "case_id": "16_k8s_imagepull_backoff",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          157
+        ],
+        "evidence_expected": [
+          156,
+          157,
+          158,
+          160,
+          161,
+          162,
+          165
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "ImagePull"
+        ],
+        "reason": "soft: missing keywords: ImagePull",
+        "actual_cause": "The pod 'notification-svc' failed to pull its image 'myregistry.io/notification-svc:v3.0.0-rc1' due to a 'NotFound' error; the logs do not include the underlying exception.",
+        "verdict": "A pod named 'notification-svc' failed to pull its image due to a 'NotFound' error, which is a rare occurrence."
+      },
+      {
+        "case_id": "17_k8s_liveness_probe_fail",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          135,
+          136,
+          137
+        ],
+        "evidence_expected": [
+          135,
+          136,
+          137,
+          138,
+          142,
+          143,
+          144,
+          145
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The liveness probe for the `checkout-svc` pod is failing with an HTTP status code of 500, indicating a server error.",
+        "verdict": "The liveness probe for the `checkout-svc` pod is failing repeatedly, causing the pod to be killed and restarted. This issue has occurred 6 times and is ongoing."
+      },
+      {
+        "case_id": "18_k8s_resource_quota",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          142
+        ],
+        "evidence_expected": [
+          137,
+          142,
+          143,
+          144,
+          145,
+          148
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The system is unable to create new pods due to a quota limit being reached.",
+        "verdict": "A quota exceeded error was encountered, preventing the creation of new pods. This issue started at 2024-03-15T15:00:10Z and has occurred multiple times."
+      },
+      {
+        "case_id": "19_k8s_pvc_mount_fail",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          187
+        ],
+        "evidence_expected": [
+          187,
+          188,
+          189,
+          190,
+          193,
+          194,
+          195
+        ],
+        "citations_valid": true,
+        "keywords_matched": false,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [
+          "PVC"
+        ],
+        "reason": "soft: missing keywords: PVC",
+        "actual_cause": "The pod is unable to mount the 'data-vol' volume due to a timeout, which suggests a network or storage issue.",
+        "verdict": "The Elasticsearch data pod is experiencing issues with mounting volumes, specifically the 'data-vol' volume, which is timing out. This issue is recurring and has been logged twice."
+      },
+      {
+        "case_id": "20_k8s_node_not_ready",
+        "kind": "diagnosis",
+        "actual_status": "ok",
+        "correct": true,
+        "evidence_overlap": true,
+        "evidence_matched": [
+          172
+        ],
+        "evidence_expected": [
+          172,
+          173,
+          174,
+          175,
+          176,
+          178,
+          179,
+          180,
+          181
+        ],
+        "citations_valid": true,
+        "keywords_matched": true,
+        "false_positive": false,
+        "fabricated": false,
+        "missing_keywords": [],
+        "reason": "",
+        "actual_cause": "The CNI plugin is not properly initialized, leading to the kubelet failing to mark nodes as ready.",
+        "verdict": "The cluster is experiencing network issues, specifically with the CNI plugin, which is preventing the kubelet from marking nodes as ready. This issue first appeared at 17:00:05 on March 15, 2024."
+      }
+    ]
+  }
+]

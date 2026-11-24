@@ -1,0 +1,228 @@
+{
+  "accuracy": 0.2222,
+  "diagnosis": {
+    "correct": 1,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        78,
+        79,
+        81
+      ],
+      "evidence_expected": [
+        78,
+        79,
+        81,
+        89
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "DataNode$DataXceiver exceptions while serving blocks to other nodes",
+      "verdict": "DataNodes are repeatedly encountering exceptions while serving blocks to peers, causing transfer failures; this occurs many times across the cluster but the logs do not reveal the underlying cause."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        1,
+        571,
+        641
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "no evidence overlap: cited [3, 63, 66], expected [1, 571, 641]",
+      "actual_cause": "Repeated termination of SendWorker threads in ZooKeeper quorum communication, likely due to network interruptions or thread interruptions.",
+      "verdict": "ZooKeeper nodes are repeatedly logging \"Send worker leaving thread\" warnings (262 occurrences), indicating frequent termination of send worker threads during quorum communication; a single unexpected exception in CommitProcessor is also recorded, but its cause is not shown in the logs."
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        12,
+        15,
+        20
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "no evidence overlap: cited [2, 785], expected [12, 15, 20]",
+      "actual_cause": "mod_jk child workerEnv is repeatedly entering an error state, causing request handling failures.",
+      "verdict": "The log shows a recurring failure of the mod_jk worker environment: many instances of \"mod_jk child workerEnv in error state\" appear, indicating that the worker environment is repeatedly entering an error state. Additionally, there are sporadic errors where jk2_init() cannot find a child in the scoreboard, suggesting issues with child process initialization. The logs do not provide the underlying cause of these errors."
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        6,
+        29,
+        30,
+        31,
+        32
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "no evidence overlap: cited [158, 347, 354, 1869], expected [6, 29, 30, 31, 32]",
+      "actual_cause": "Repeated SSH authentication failures from IP 20, likely a brute\u2011force attack exhausting authentication methods and triggering disconnects",
+      "verdict": "The logs show a large spike of SSH authentication failures, mainly from IP 20, with repeated disconnects due to \"No more user authentication methods available\" and a fatal write error. A separate error from IP 11 shows a JSch client authentication failure. The pattern indicates a brute\u2011force or misconfigured client attack causing the SSH daemon to reject connections."
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        8,
+        14,
+        15,
+        19
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199502, Requested 2406. Please try again in 13m44.256s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        10,
+        11
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199495, Requested 2818. Please try again in 16m39.216s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        4,
+        12,
+        13
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199493, Requested 3504. Please try again in 21m34.704s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        7,
+        8,
+        9
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199490, Requested 3688. Please try again in 22m52.896s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

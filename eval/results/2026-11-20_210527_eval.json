@@ -1,0 +1,240 @@
+{
+  "accuracy": 0.2222,
+  "diagnosis": {
+    "correct": 1,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        78,
+        79,
+        81
+      ],
+      "evidence_expected": [
+        78,
+        79,
+        81,
+        89
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "DataNode$DataXceiver encountered exceptions while serving blocks to remote nodes; the logs do not include the underlying exception details.",
+      "verdict": "Multiple DataNode DataXceiver components logged WARNs indicating exceptions while serving blocks to peer nodes; this occurred repeatedly across different blocks and nodes, suggesting intermittent network or disk issues during block replication."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        1,
+        3,
+        63,
+        506,
+        571,
+        641
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199848, Requested 6544. Please try again in 46m1.344s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        2,
+        12,
+        15,
+        20,
+        796
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199846, Requested 1998. Please try again in 13m16.608s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        6,
+        29,
+        30,
+        31,
+        32,
+        158,
+        347,
+        1869
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199845, Requested 5886. Please try again in 41m15.792s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        8,
+        14,
+        15,
+        17,
+        18,
+        19
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199844, Requested 3131. Please try again in 21m25.2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199843, Requested 1816. Please try again in 11m56.688s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        4,
+        12,
+        13
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199842, Requested 2585. Please try again in 17m28.464s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        7,
+        8,
+        9
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.RateLimitError: RateLimitError: GroqException - {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m2qnejx4e8s8fd9bxjt8pzh4` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199841, Requested 3398. Please try again in 23m19.248s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}\n"
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

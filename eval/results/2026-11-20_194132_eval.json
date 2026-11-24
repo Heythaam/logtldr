@@ -1,0 +1,171 @@
+{
+  "accuracy": 0.5556,
+  "diagnosis": {
+    "correct": 4,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "DataNode$DataXceiver exceptions while serving blocks, likely due to network or disk issues; the logs do not include the underlying exception details.",
+      "verdict": "DataNode block serving failures are occurring frequently (80 WARNs in 2000 lines), indicating repeated exceptions while transferring blocks between DataNodes."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "quorum",
+        "election"
+      ],
+      "reason": "missing keywords: quorum, election",
+      "actual_cause": "SendWorker threads are exiting unexpectedly, likely due to network or resource issues; the logs do not include the underlying exception.",
+      "verdict": "The ZooKeeper cluster is experiencing frequent SendWorker thread exits, with 262 WARNs over the log period, and a single unexpected exception from CommitProcessor; the logs do not show why the workers exit or the details of the exception."
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "500",
+        "backend"
+      ],
+      "reason": "missing keywords: 500, backend",
+      "actual_cause": "mod_jk worker environment errors preventing healthy worker processes",
+      "verdict": "The logs reveal a recurring failure of the mod_jk worker environment, with 539 instances of \"mod_jk child workerEnv in error state\" and additional child init errors, indicating that the mod_jk connector cannot maintain healthy worker processes. Sporadic \"jk2_init() Can't find child\" and directory index forbidden errors also appear, but the primary issue is the mod_jk worker failures."
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Repeated failed SSH authentication attempts from IP address ip_20 exhaust all authentication methods, leading to SSH disconnects with the message \"No more user authentication methods available\".",
+      "verdict": "The SSH service is repeatedly disconnecting clients from IP addresses ip_20 and ip_11 due to authentication failures; the most frequent issue is that clients exhaust all authentication methods, causing the server to send \"No more user authentication methods available\" disconnects. This pattern occurs hundreds of times across the log, indicating a likely brute\u2011force or automated login attempt. Additionally, a JSch client from ip_11 reports a JSchException auth failure, and a fatal write error indicates a connection reset by peer."
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "assert",
+        "test_multiply",
+        "fail"
+      ],
+      "reason": "missing keywords: assert, test_multiply, fail",
+      "actual_cause": "multiply function returns incorrect result for inputs 3 and 4; the test expects 12 but got 11",
+      "verdict": "The test for multiply failed because multiply(3,4) returned 11 instead of 12; this happened once in the test suite."
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "pip install process was killed, likely due to out\u2011of\u2011memory or resource limits",
+      "verdict": "During the Docker build, the pip install step was killed (exit code 137), causing the build to fail. This occurred once in the 13 lines sampled."
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "peer"
+      ],
+      "reason": "missing keywords: peer",
+      "actual_cause": "npm install failed because react-dom@17.0.2 requires react@^17.0.0, but the project has react@18.2.0, leading to an ERESOLVE dependency conflict",
+      "verdict": "npm install failed due to a dependency conflict between react@18.2.0 and react-dom@17.0.2, causing an ERESOLVE error; this happened once during the install of myapp@1.0.0."
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Disk space exhausted during npm install, leading to ENOSPC errors and build failure",
+      "verdict": "The build failed because the runner ran out of disk space while writing npm cache artifacts, causing ENOSPC errors and a job exit code 1."
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+status: "ok"
+cause: "DataNode repeatedly throws exceptions while serving blocks to other nodes"
+cause_keywords: ["exception", "block", "DataNode"]
+cause_type: "direct"
+evidence_line_ids: [78, 79, 81, 89]
+expected_format: "plaintext"
+expected_unknowns:
+  - "only one DataNode's logs present; peer failure could be network or peer-side"

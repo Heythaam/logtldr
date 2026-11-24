@@ -1,0 +1,8 @@
+status: "ok"
+cause: "Zookeeper peer lost quorum during leader election"
+cause_keywords: ["SendWorker", "terminat"]
+cause_type: "temporal"
+evidence_line_ids: [1, 3, 63, 506, 571, 641]
+expected_format: "plaintext"
+expected_unknowns:
+  - "only one peer's logs present; other peers may have distinct failures"

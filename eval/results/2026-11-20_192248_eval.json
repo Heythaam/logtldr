@@ -1,0 +1,154 @@
+{
+  "accuracy": 0.5,
+  "diagnosis": {
+    "correct": 4,
+    "total": 9
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 0,
+    "total": 0,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": ""
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "quorum",
+        "election"
+      ],
+      "reason": "missing keywords: quorum, election"
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "500",
+        "backend"
+      ],
+      "reason": "missing keywords: 500, backend"
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": ""
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "assert",
+        "test_multiply",
+        "fail"
+      ],
+      "reason": "missing keywords: assert, test_multiply, fail"
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": ""
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "peer"
+      ],
+      "reason": "missing keywords: peer"
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "cause_match": true,
+      "citations_valid": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": ""
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": ""
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "diagnosis",
+      "actual_status": "not_enough_signal",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "timeout",
+        "db"
+      ],
+      "reason": "expected a diagnosis, got status='not_enough_signal'"
+    }
+  ]
+}

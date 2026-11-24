@@ -1,0 +1,236 @@
+{
+  "accuracy": 0.1111,
+  "diagnosis": {
+    "correct": 0,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        78,
+        79,
+        81,
+        89
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        1,
+        3,
+        63,
+        506,
+        571,
+        641
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        2,
+        12,
+        15,
+        20,
+        796
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        6,
+        29,
+        30,
+        31,
+        32,
+        158,
+        347,
+        1869
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        8,
+        14,
+        15,
+        17,
+        18,
+        19
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        4,
+        12,
+        13
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [
+        7,
+        8,
+        9
+      ],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "expected a diagnosis, got status='error'",
+      "actual_cause": null,
+      "verdict": "litellm.AuthenticationError: AuthenticationError: OpenrouterException - {\"error\":{\"message\":\"Missing Authentication header\",\"code\":401}}"
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

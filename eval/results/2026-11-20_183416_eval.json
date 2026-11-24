@@ -1,0 +1,176 @@
+{
+  "accuracy": 0.1,
+  "diagnosis": {
+    "correct": 0,
+    "total": 9
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 0,
+    "total": 0,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "Connection reset",
+        "IOException",
+        "writeBlock",
+        "Got exception"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "no quorum",
+        "quorum lost",
+        "Notification time out"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "Connection refused",
+        "proxy",
+        "disabling worker"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "Failed password",
+        "authentication failures",
+        "Invalid user"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "AssertionError",
+        "test_multiply",
+        "FAILED"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "Killed",
+        "exit code: 137",
+        "out of memory"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "ERESOLVE",
+        "peer",
+        "react-dom",
+        "dependency conflict"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "error",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "ENOSPC",
+        "no space left on device"
+      ],
+      "reason": "expected a diagnosis, got status='error'"
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": ""
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "diagnosis",
+      "actual_status": "not_enough_signal",
+      "correct": false,
+      "cause_match": false,
+      "citations_valid": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [
+        "upstream timeout",
+        "db-primary",
+        "504"
+      ],
+      "reason": "expected a diagnosis, got status='not_enough_signal'"
+    }
+  ]
+}

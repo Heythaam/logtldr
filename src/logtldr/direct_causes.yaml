@@ -1,0 +1,168 @@
+# Direct-cause patterns for logtldr (LT-25).
+#
+# A match permits evidence_type "direct" on the hypothesis — it does NOT
+# raise confidence.  Ambiguous signals (connection refused, timeout) are
+# intentionally excluded; they belong to upstream heuristics (LT-35).
+#
+# Fields:
+#   name        – short slug used in code and reports
+#   keywords    – list of substrings matched case-insensitively against
+#                 the log line's message field
+#   level       – log level(s) the pattern applies to (ERROR, FATAL, or both)
+#   description – human-readable explanation of what this cause means
+
+- name: oom_killed
+  keywords: ["OOMKilled", "Out of memory", "oom-kill", "Cannot allocate memory"]
+  level: [ERROR, FATAL]
+  description: >-
+    Process was terminated by the kernel OOM killer or container runtime
+    because it exceeded its memory limit.
+
+- name: disk_full
+  keywords: ["No space left on device", "disk full", "ENOSPC"]
+  level: [ERROR, FATAL]
+  description: >-
+    Write failed because the filesystem has no free space remaining.
+
+- name: permission_denied
+  keywords: ["Permission denied", "EACCES", "Access denied", "403 Forbidden"]
+  level: [ERROR, FATAL]
+  description: >-
+    Operation was rejected due to insufficient filesystem, network, or
+    API permissions.
+
+- name: invalid_config_key
+  keywords: ["invalid config", "unknown configuration", "unrecognized option", "invalid option"]
+  level: [ERROR, FATAL]
+  description: >-
+    A configuration file or flag contains an unrecognised key or value.
+
+- name: missing_env_var
+  keywords: ["environment variable not set", "env var missing", "required variable", "KeyError:"]
+  level: [ERROR, FATAL]
+  description: >-
+    A required environment variable was not set at startup.
+
+- name: port_in_use
+  keywords: ["Address already in use", "EADDRINUSE", "port is already allocated"]
+  level: [ERROR, FATAL]
+  description: >-
+    The process could not bind to its configured port because another
+    process is already listening on it.
+
+- name: cert_expired
+  keywords: ["certificate has expired", "x509: certificate", "SSL certificate problem", "CERT_HAS_EXPIRED"]
+  level: [ERROR, FATAL]
+  description: >-
+    A TLS/SSL certificate has expired or is not yet valid, preventing
+    a secure connection.
+
+- name: migration_failed
+  keywords: ["migration failed", "migrate: error", "schema migration", "alembic.util.exc"]
+  level: [ERROR, FATAL]
+  description: >-
+    A database schema migration did not complete successfully.
+
+- name: segfault
+  keywords: ["Segmentation fault", "SIGSEGV", "segfault at"]
+  level: [ERROR, FATAL]
+  description: >-
+    Process crashed due to an invalid memory access (segmentation fault).
+
+- name: stack_overflow
+  keywords: ["StackOverflowError", "stack overflow", "maximum call stack size exceeded", "maximum recursion depth exceeded"]
+  level: [ERROR, FATAL]
+  description: >-
+    Unbounded recursion or deeply nested calls exhausted the call stack.
+
+- name: file_not_found
+  keywords: ["FileNotFoundError", "No such file or directory", "ENOENT"]
+  level: [ERROR, FATAL]
+  description: >-
+    A required file or directory does not exist at the expected path.
+
+- name: syntax_error
+  keywords: ["SyntaxError", "syntax error", "unexpected token", "parse error"]
+  level: [ERROR, FATAL]
+  description: >-
+    Source code or a configuration file contains a syntax error that
+    prevents parsing.
+
+- name: assertion_failed
+  keywords: ["AssertionError", "assertion failed", "assert failed"]
+  level: [ERROR, FATAL]
+  description: >-
+    A runtime assertion check failed, indicating a violated invariant.
+
+- name: image_pull_failed
+  keywords: ["ImagePullBackOff", "ErrImagePull", "manifest unknown", "pull access denied"]
+  level: [ERROR, FATAL]
+  description: >-
+    The container runtime could not pull the specified image from the
+    registry (missing, unauthorized, or network issue).
+
+- name: crashloop_backoff
+  keywords: ["CrashLoopBackOff", "Back-off restarting failed container"]
+  level: [ERROR, FATAL]
+  description: >-
+    A container is repeatedly crashing and Kubernetes is backing off
+    before restarting it.
+
+- name: resource_quota_exceeded
+  keywords: ["exceeded quota", "resource quota", "forbidden: exceeded"]
+  level: [ERROR, FATAL]
+  description: >-
+    The operation was rejected because it would exceed the namespace
+    or account resource quota.
+
+- name: dns_resolution_failed
+  keywords: ["Name or service not known", "NXDOMAIN", "could not resolve host", "DNS lookup failed"]
+  level: [ERROR, FATAL]
+  description: >-
+    DNS resolution failed for the target hostname.
+
+- name: auth_failed
+  keywords: ["401 Unauthorized", "authentication failed", "invalid credentials", "login failed"]
+  level: [ERROR, FATAL]
+  description: >-
+    Authentication was rejected due to invalid or expired credentials.
+
+- name: read_only_filesystem
+  keywords: ["Read-only file system", "EROFS"]
+  level: [ERROR, FATAL]
+  description: >-
+    A write operation failed because the filesystem is mounted read-only.
+
+- name: dependency_missing
+  keywords: ["ModuleNotFoundError", "ImportError", "Cannot find module", "package not found"]
+  level: [ERROR, FATAL]
+  description: >-
+    A required library or module could not be imported or located.
+
+- name: deadlock_detected
+  keywords: ["deadlock detected", "Deadlock found", "lock wait timeout"]
+  level: [ERROR, FATAL]
+  description: >-
+    The database or application detected a deadlock between concurrent
+    transactions.
+
+- name: data_corruption
+  keywords: ["checksum mismatch", "corrupt", "data integrity", "CRC error"]
+  level: [ERROR, FATAL]
+  description: >-
+    Data failed an integrity check, indicating corruption in storage
+    or transmission.
+
+- name: volume_mount_failed
+  keywords: ["MountVolume.SetUp failed", "unable to attach or mount", "FailedMount"]
+  level: [ERROR, FATAL]
+  description: >-
+    A persistent volume could not be attached or mounted to the
+    container or host.
+
+- name: node_not_ready
+  keywords: ["NodeNotReady", "node not ready", "ConditionFalse Ready"]
+  level: [ERROR, FATAL]
+  description: >-
+    A Kubernetes node has entered a NotReady state and cannot schedule
+    or run pods.

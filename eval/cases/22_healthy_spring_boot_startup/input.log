@@ -1,0 +1,16 @@
+2024-01-15 10:00:00.001 INFO  [main] o.s.b.SpringApplication : Starting UserServiceApplication v2.1.0
+2024-01-15 10:00:00.045 INFO  [main] o.s.b.SpringApplication : No active profile set, falling back to default
+2024-01-15 10:00:01.230 INFO  [main] o.s.b.w.e.t.TomcatWebServer : Tomcat initialized with port 8080
+2024-01-15 10:00:01.245 INFO  [main] o.a.c.c.StandardEngine : Starting Servlet engine: Apache Tomcat/10.1.16
+2024-01-15 10:00:01.512 INFO  [main] o.a.c.c.ContainerBase : Initializing Spring embedded WebApplicationContext
+2024-01-15 10:00:01.515 INFO  [main] o.s.b.w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1480ms
+2024-01-15 10:00:02.102 INFO  [main] o.h.jpa.internal.util.LogHelper : HHH000204: Processing PersistenceUnitInfo
+2024-01-15 10:00:02.340 INFO  [main] o.h.Version : HHH000412: Hibernate ORM core version 6.3.1.Final
+2024-01-15 10:00:02.890 INFO  [main] o.h.e.t.j.p.i.JtaPlatformInitiator : HHH000490: Using JtaPlatform implementation
+2024-01-15 10:00:03.015 INFO  [main] o.s.o.j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory
+2024-01-15 10:00:03.456 INFO  [main] o.s.b.a.e.w.EndpointLinksResolver : Exposing 3 endpoint(s) beneath base path '/actuator'
+2024-01-15 10:00:03.521 INFO  [main] o.s.b.w.e.t.TomcatWebServer : Tomcat started on port 8080
+2024-01-15 10:00:03.540 INFO  [main] o.s.b.SpringApplication : Started UserServiceApplication in 3.539s (process running for 3.9s)
+2024-01-15 10:00:04.001 INFO  [http-nio-8080-exec-1] o.a.c.c.ContainerBase : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-01-15 10:00:04.002 INFO  [http-nio-8080-exec-1] o.s.w.s.DispatcherServlet : Initializing Servlet 'dispatcherServlet'
+2024-01-15 10:00:04.003 INFO  [http-nio-8080-exec-1] o.s.w.s.DispatcherServlet : Completed initialization in 1ms

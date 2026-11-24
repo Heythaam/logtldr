@@ -1,0 +1,8 @@
+status: "ok"
+cause: "Node node-3 NotReady: CNI plugin not initialized (no networks in /etc/cni/net.d) and lost connection to API server"
+cause_keywords: ["NotReady", "CNI"]
+cause_type: "direct"
+evidence_line_ids: [172, 173, 174, 175, 176, 178, 179, 180, 181]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the CNI plugin was uninstalled, the DaemonSet failed, or the node was freshly joined requires checking kube-system pods on node-3"

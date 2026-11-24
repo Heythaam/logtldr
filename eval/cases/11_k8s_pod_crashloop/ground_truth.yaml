@@ -1,0 +1,8 @@
+status: "ok"
+cause: "postgres-primary-0 CrashLoopBackOff: password authentication failed for user appuser"
+cause_keywords: ["CrashLoopBackOff", "password", "authentication"]
+cause_type: "direct"
+evidence_line_ids: [153, 154, 158, 159, 163, 164, 165]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the password was changed intentionally or the secret was misconfigured"

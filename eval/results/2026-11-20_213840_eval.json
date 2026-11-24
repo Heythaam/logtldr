@@ -1,0 +1,262 @@
+{
+  "accuracy": 1.0,
+  "diagnosis": {
+    "correct": 8,
+    "total": 8
+  },
+  "healthy": {
+    "correct": 1,
+    "total": 1,
+    "false_positives": 0
+  },
+  "unknown": {
+    "correct": 1,
+    "total": 1,
+    "fabricated": 0
+  },
+  "cases": [
+    {
+      "case_id": "01_hdfs_datanode_error",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        78,
+        79,
+        81
+      ],
+      "evidence_expected": [
+        78,
+        79,
+        81,
+        89
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "DataNode$DataXceiver encountered exceptions while serving blocks to remote nodes; the logs do not include the underlying exception details.",
+      "verdict": "Multiple DataNode DataXceiver components logged WARNs indicating exceptions while serving blocks to peer nodes; this occurred repeatedly across different blocks and nodes, suggesting intermittent network or disk issues during block replication."
+    },
+    {
+      "case_id": "02_zookeeper_quorum_lost",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        3,
+        63,
+        506
+      ],
+      "evidence_expected": [
+        1,
+        3,
+        63,
+        506,
+        571,
+        641
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "SendWorker threads are repeatedly terminating, likely due to interruptions or resource constraints in the QuorumCnxManager send worker component.",
+      "verdict": "The logs show a frequent pattern of SendWorker threads exiting unexpectedly, with 262 WARN entries of \"Send worker leaving thread\" across many timestamps, indicating repeated interruptions or failures in the send worker component. Additionally, a single ERROR entry records an unexpected exception in CommitProcessor, but the underlying cause is not detailed in the logs."
+    },
+    {
+      "case_id": "03_apache_500_errors",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        2,
+        796
+      ],
+      "evidence_expected": [
+        2,
+        12,
+        15,
+        20,
+        796
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "mod_jk child workerEnv processes are failing to start or crash, leading to repeated error state entries",
+      "verdict": "mod_jk workerEnv processes are repeatedly entering an error state (539 occurrences), indicating that the worker environment is failing to start or crash; the logs show the error but not the underlying cause."
+    },
+    {
+      "case_id": "04_linux_auth_failures",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        158,
+        347,
+        1869
+      ],
+      "evidence_expected": [
+        6,
+        29,
+        30,
+        31,
+        32,
+        158,
+        347,
+        1869
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Repeated SSH authentication failures from ip_20 and ip_11 leading to disconnects due to exhaustion of allowed authentication methods",
+      "verdict": "The logs show repeated SSH authentication failures and disconnects from IPs ip_20 and ip_11, likely due to brute\u2011force login attempts exhausting allowed authentication methods; a few client\u2011side errors (JSchException) and a connection reset by peer are also recorded."
+    },
+    {
+      "case_id": "05_pytest_assertion_failure",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        17
+      ],
+      "evidence_expected": [
+        8,
+        14,
+        15,
+        17,
+        18,
+        19
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "multiply function returns incorrect result for inputs 3 and 4",
+      "verdict": "The test suite ran 5 tests, but test_multiply failed because multiply(3,4) returned 11 instead of 12; the failure is isolated to that test."
+    },
+    {
+      "case_id": "06_docker_build_oom",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        12,
+        13
+      ],
+      "evidence_expected": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "pip install process was killed, likely due to out\u2011of\u2011memory or resource limits",
+      "verdict": "During the Docker build, the pip install step was killed (exit code 137), causing the build to fail. This occurred once in the 13 lines sampled."
+    },
+    {
+      "case_id": "07_npm_peer_dep_conflict",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        13
+      ],
+      "evidence_expected": [
+        4,
+        12,
+        13
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "npm install failed because react-dom@17.0.2 requires react ^17.0.0, but react@18.2.0 was found, leading to an ERESOLVE dependency conflict.",
+      "verdict": "npm install failed due to a dependency conflict between react 18.2.0 and react-dom 17.0.2, causing an ERESOLVE error; this occurred once in the log."
+    },
+    {
+      "case_id": "08_github_actions_disk_full",
+      "kind": "diagnosis",
+      "actual_status": "ok",
+      "correct": true,
+      "evidence_overlap": true,
+      "evidence_matched": [
+        7,
+        8,
+        9
+      ],
+      "evidence_expected": [
+        7,
+        8,
+        9
+      ],
+      "citations_valid": true,
+      "keywords_matched": true,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": "Disk space exhaustion on /home/runner/.npm/_cacache during npm install/build",
+      "verdict": "The build failed because the runner ran out of disk space while writing npm cache artifacts, causing an ENOSPC error and a shutdown signal."
+    },
+    {
+      "case_id": "09_healthy_ci_run",
+      "kind": "healthy",
+      "actual_status": "nothing_unusual",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    },
+    {
+      "case_id": "10_misleading_timeout",
+      "kind": "unknown",
+      "actual_status": "not_enough_signal",
+      "correct": true,
+      "evidence_overlap": false,
+      "evidence_matched": [],
+      "evidence_expected": [],
+      "citations_valid": false,
+      "keywords_matched": false,
+      "false_positive": false,
+      "fabricated": false,
+      "missing_keywords": [],
+      "reason": "",
+      "actual_cause": null,
+      "verdict": "Refused by gate"
+    }
+  ]
+}

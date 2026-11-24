@@ -1,0 +1,14 @@
+------------------------------------------------------------------------------------------------------------------
+Case                           | Format       | TS    | Levels               | Tmpl  | Anom                 | Gate
+------------------------------------------------------------------------------------------------------------------
+01_hdfs_datanode_error         | plaintext    | 0     | INFO:1920,WARN:80    | 2000  | 0                    | proceed
+02_zookeeper_quorum_lost       | plaintext    | 0     | ERROR:13,INFO:669,WARN:1318 | 2000  | 0                    | proceed
+03_apache_500_errors           | plaintext    | 0     | ERROR:595,INFO:1405  | 2000  | 0                    | proceed
+04_linux_auth_failures         | npm(!=plaintext) | 0     | INFO:2000            | 2000  | 0                    | proceed
+05_pytest_assertion_failure    | pytest       | 0     | ERROR:4,INFO:17      | 21    | 0                    | proceed
+06_docker_build_oom            | npm(!=docker) | 0     | INFO:13              | 13    | 0                    | proceed
+07_npm_peer_dep_conflict       | npm          | 0     | ERROR:16,INFO:3      | 19    | 0                    | proceed
+08_github_actions_disk_full    | json         | 11    | ERROR:5,INFO:6       | 11    | 0                    | proceed
+09_healthy_ci_run              | pytest       | 0     | INFO:19              | 19    | 0                    | proceed
+10_misleading_timeout          | pytest(!=plaintext) | 13    | ERROR:3,INFO:10      | 13    | 0                    | proceed
+------------------------------------------------------------------------------------------------------------------

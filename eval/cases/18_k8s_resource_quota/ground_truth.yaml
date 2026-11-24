@@ -1,0 +1,8 @@
+status: "ok"
+cause: "order-svc scale-up blocked: ResourceQuota default-quota exceeded (CPU 3500m/4000m, memory 4Gi/4Gi)"
+cause_keywords: ["quota", "exceeded"]
+cause_type: "direct"
+evidence_line_ids: [137, 142, 143, 144, 145, 148]
+expected_format: "plaintext"
+expected_unknowns:
+  - "whether the quota should be raised or existing workloads should be right-sized depends on cluster policy"

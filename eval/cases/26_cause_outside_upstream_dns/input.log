@@ -1,0 +1,14 @@
+2024-01-15T10:00:00Z INFO  [billing-svc] Processing invoice inv-44210
+2024-01-15T10:00:01Z INFO  [billing-svc] Initiating charge via Stripe API
+2024-01-15T10:00:01Z ERROR [billing-svc] DNS resolution failed for api.stripe.com: SERVFAIL
+2024-01-15T10:00:02Z INFO  [billing-svc] Retrying DNS lookup for api.stripe.com
+2024-01-15T10:00:02Z ERROR [billing-svc] DNS resolution failed for api.stripe.com: SERVFAIL
+2024-01-15T10:00:03Z INFO  [billing-svc] Processing invoice inv-44211
+2024-01-15T10:00:03Z ERROR [billing-svc] DNS resolution failed for api.stripe.com: SERVFAIL
+2024-01-15T10:00:04Z WARN  [billing-svc] Stripe API unreachable, queuing invoice inv-44210 for retry
+2024-01-15T10:00:04Z ERROR [billing-svc] DNS resolution failed for api.stripe.com: SERVFAIL
+2024-01-15T10:00:05Z WARN  [billing-svc] Stripe API unreachable, queuing invoice inv-44211 for retry
+2024-01-15T10:00:05Z ERROR [billing-svc] DNS resolution failed for api.stripe.com: SERVFAIL
+2024-01-15T10:00:06Z WARN  [billing-svc] 3 invoices queued for retry due to DNS failures
+2024-01-15T10:00:30Z INFO  [billing-svc] DNS resolution succeeded for api.stripe.com
+2024-01-15T10:00:31Z INFO  [billing-svc] Stripe API reachable again, processing retry queue
