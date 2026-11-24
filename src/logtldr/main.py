@@ -161,6 +161,13 @@ def _get_version() -> str:
         return "0.1.0"
 
 
+def _get_version() -> str:
+    try:
+        return pkg_version("logtldr")
+    except PackageNotFoundError:
+        return "0.1.0"
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = _Parser(prog="logtldr", description="Summarize log streams with an LLM.")
     parser.add_argument("--version", action="version", version=f"logtldr {_get_version()}")
@@ -282,6 +289,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         print(render_terminal(final_summary))
 
     return 0
+
+def _entry() -> None:
+    """Console-script entry point for setuptools."""
+    sys.exit(main())
+
 
 def _entry() -> None:
     """Console-script entry point for setuptools."""
