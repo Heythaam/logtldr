@@ -45,9 +45,9 @@ def test_token_estimation_accuracy() -> None:
 
     view = build_compressed_view(lines, templates, anomalies)
     
-    # Recompute actual tokens
-    from tiktoken import get_encoding
-    actual_tokens = len(get_encoding("cl100k_base").encode(view.model_dump_json(exclude={"estimated_tokens"})))
+    # Recompute actual tokens with the same (offline-capable) tokenizer
+    from logtldr.compressed_view import _get_encoding
+    actual_tokens = len(_get_encoding().encode(view.model_dump_json(exclude={"estimated_tokens"})))
     
     diff = abs(view.estimated_tokens - actual_tokens)
     assert diff / actual_tokens < 0.05

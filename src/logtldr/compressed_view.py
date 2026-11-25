@@ -1,13 +1,25 @@
 """Compressed view builder (AD-3)."""
 
+import importlib.util
 import json
-from typing import Any
-
-import tiktoken
+import os
+import sys
+from pathlib import Path
+from typing import Any, Optional
 
 from logtldr.models import Anomaly, CompressedView, LogLine, Template
 
-_ENCODING = tiktoken.get_encoding("cl100k_base")
+_ENCODING_NAME = "cl100k_base"
+# tiktoken caches each encoding under the SHA-1 of its download URL. litellm
+# (a hard dependency) ships this exact file, so no download is ever needed.
+_BUNDLED_FILE = "9b5ad71b2ce5302211f9c61530b329a4922fc6a4"
+# Rough chars-per-token ratio for the last-resort estimate.
+_CHARS_PER_TOKEN = 4
+
+# Loaded on first use, not at import: importing this module must never touch
+# the network (LT-46). False means "tried and failed, use the estimate".
+_encoding: Any = None
+_encoding_failed = False
 _MAX_TOKENS = 8000
 _MAX_TEMPLATES = 30
 _CONTEXT_RADIUS = 5
@@ -19,14 +31,74 @@ _ANOMALY_SHARE = 0.4
 _SAFETY_MARGIN = 150
 
 
+def _bundled_cache_dir() -> Optional[str]:
+    """litellm's bundled tokenizer folder, found without importing litellm."""
+    spec = importlib.util.find_spec("litellm")
+    if spec is None or spec.origin is None:
+        return None
+    folder = Path(spec.origin).parent / "litellm_core_utils" / "tokenizers"
+    return str(folder) if (folder / _BUNDLED_FILE).is_file() else None
+
+
+def _load_encoding() -> Any:
+    """Load cl100k_base, preferring sources that need no network.
+
+    1. litellm's bundled copy (offline, exact counts).
+    2. tiktoken's normal lookup (user cache, or a download when online).
+    Returns None if both fail; callers then estimate.
+    """
+    import tiktoken
+
+    bundled = _bundled_cache_dir()
+    if bundled is not None:
+        previous = os.environ.get("TIKTOKEN_CACHE_DIR")
+        os.environ["TIKTOKEN_CACHE_DIR"] = bundled
+        try:
+            return tiktoken.get_encoding(_ENCODING_NAME)
+        except Exception:
+            pass
+        finally:
+            if previous is None:
+                os.environ.pop("TIKTOKEN_CACHE_DIR", None)
+            else:
+                os.environ["TIKTOKEN_CACHE_DIR"] = previous
+
+    try:
+        return tiktoken.get_encoding(_ENCODING_NAME)
+    except Exception:
+        return None
+
+
+def _get_encoding() -> Any:
+    """Cached encoding, or None if unavailable (warns once on stderr)."""
+    global _encoding, _encoding_failed
+    if _encoding is None and not _encoding_failed:
+        _encoding = _load_encoding()
+        if _encoding is None:
+            _encoding_failed = True
+            print(
+                "logtldr: tokenizer unavailable offline; using approximate token counts",
+                file=sys.stderr,
+            )
+    return _encoding
+
+
+def _count_text(text: str) -> int:
+    """Token count of text: exact if the tokenizer loaded, else ~len/4."""
+    encoding = _get_encoding()
+    if encoding is None:
+        return max(1, len(text) // _CHARS_PER_TOKEN) if text else 0
+    return len(encoding.encode(text))
+
+
 def _tokens(obj: Any) -> int:
     """Token count of obj serialized compactly (close to model_dump_json)."""
-    return len(_ENCODING.encode(json.dumps(obj, separators=(",", ":"), ensure_ascii=False)))
+    return _count_text(json.dumps(obj, separators=(",", ":"), ensure_ascii=False))
 
 
 def _count_view(view: CompressedView) -> int:
-    """Exact token count of what is sent to the LLM."""
-    return len(_ENCODING.encode(view.model_dump_json(exclude={"estimated_tokens"})))
+    """Token count of what is sent to the LLM (exact when the tokenizer loaded)."""
+    return _count_text(view.model_dump_json(exclude={"estimated_tokens"}))
 
 
 def _serialize_line(line: LogLine) -> dict[str, Any]:

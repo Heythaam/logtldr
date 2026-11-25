@@ -115,6 +115,8 @@ Provider prefixes: `ollama/`, `groq/`, `gemini/`, `openrouter/`, `anthropic/`.
 
 **Local is the default.** When you run `logtldr` without `--model`, it uses `ollama/llama3.1:8b` on `localhost:11434`. No data leaves your machine.
 
+**Works fully offline.** The tokenizer used to fit logs into the model's context ships with the install (via `litellm`), so logtldr never downloads anything at runtime. If it can't be loaded for any reason, logtldr falls back to approximate token counts and says so on stderr. This is tested in CI with all network sockets blocked.
+
 To use a cloud model, you must explicitly confirm:
 
 ```bash
