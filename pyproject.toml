@@ -30,6 +30,8 @@ dependencies = [
     "httpx",
     "litellm",
     "pydantic",
+    "pyyaml",
+    "tiktoken",
 ]
 
 [project.optional-dependencies]
