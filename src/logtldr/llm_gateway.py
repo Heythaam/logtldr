@@ -1,5 +1,8 @@
 """LiteLLM integration (AD-4)."""
 
+import importlib.util
+import os
+import sys
 from typing import Any, TypeVar
 from urllib.parse import urlparse
 
@@ -12,6 +15,18 @@ from logtldr.models import CompressedView
 from logtldr.prompt import build_messages
 
 T = TypeVar("T", bound=BaseModel)
+
+TRACING_ENV = "LOGTLDR_TRACING"
+_LANGFUSE = "langfuse"
+
+
+def tracing_requested() -> bool:
+    """True if the user explicitly opted into Langfuse tracing."""
+    return os.environ.get(TRACING_ENV, "").strip().lower() in {"1", "true", "yes"}
+
+
+def _langfuse_installed() -> bool:
+    return importlib.util.find_spec(_LANGFUSE) is not None
 
 
 class LLMGateway:
@@ -39,13 +54,45 @@ class LLMGateway:
         if config.api_key:
             litellm.api_key = config.api_key
 
-        # NEW LANGFUSE LOGIC - DO NOT IMPORT LITELLM HERE
-        if not self.local:
-            try:
-                litellm.success_callback = ["langfuse"]
-                litellm.failure_callback = ["langfuse"]
-            except Exception:
-                pass
+        self.tracing = self._configure_tracing()
+
+    def _configure_tracing(self) -> bool:
+        """Turn Langfuse tracing on only if the user opted in (LT-47).
+
+        Tracing sends redacted prompts and responses to Langfuse, so it needs
+        an explicit LOGTLDR_TRACING=1, never runs in local mode, and needs the
+        optional extra (pip install "logtldr[tracing]"). Langfuse is always
+        removed from LiteLLM's callbacks first, because they are process-wide
+        and could be left over from earlier code; other callbacks are kept.
+        """
+        enable = False
+        if tracing_requested():
+            if self.local:
+                print(
+                    f"logtldr: {TRACING_ENV} ignored in local mode; "
+                    "no data leaves your machine.",
+                    file=sys.stderr,
+                )
+            elif not _langfuse_installed():
+                print(
+                    f"logtldr: {TRACING_ENV}=1 but langfuse is not installed; "
+                    'run: pip install "logtldr[tracing]". Tracing disabled.',
+                    file=sys.stderr,
+                )
+            else:
+                enable = True
+                print(
+                    "logtldr: tracing on; redacted prompts and responses "
+                    "are sent to Langfuse.",
+                    file=sys.stderr,
+                )
+
+        for attr in ("success_callback", "failure_callback"):
+            callbacks = [cb for cb in (getattr(litellm, attr) or []) if cb != _LANGFUSE]
+            if enable:
+                callbacks.append(_LANGFUSE)
+            setattr(litellm, attr, callbacks)
+        return enable
 
     def _validate_localhost_endpoint(self, api_base: str) -> None:
         """Check that api_base is localhost. Fails closed."""
