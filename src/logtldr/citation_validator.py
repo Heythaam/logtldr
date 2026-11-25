@@ -2,11 +2,23 @@
 
 from logtldr.models import LLMResponse, LogLine
 
+# Shortest snippet accepted as evidence, after stripping whitespace.
+# Blocks "", " ", single letters and bare tokens like "ERROR" (which appear
+# in almost every line) while keeping real short evidence like "OOMKilled".
+MIN_SNIPPET_CHARS = 8
+
+
+def _is_meaningful(snippet: str) -> bool:
+    """True if the snippet is long enough to count as evidence."""
+    return len(snippet.strip()) >= MIN_SNIPPET_CHARS
+
 
 def validate_citations(response: LLMResponse, lines: list[LogLine]) -> LLMResponse:
     """Verify citations against the redacted logs.
 
     - Checks that line_id exists and the snippet matches exactly in redacted_text.
+    - Rejects snippets shorter than MIN_SNIPPET_CHARS after stripping, since
+      an empty or tiny snippet is contained in almost any line.
     - Marks `citation_valid` on each Citation.
     - Drops any Hypothesis that has no valid citations.
     - If no hypotheses remain, changes status to 'not_enough_signal'.
@@ -26,7 +38,11 @@ def validate_citations(response: LLMResponse, lines: list[LogLine]) -> LLMRespon
         
         for citation in hyp.citations:
             line = line_dict.get(citation.line_id)
-            if line and citation.snippet in line.redacted_text:
+            if (
+                line
+                and _is_meaningful(citation.snippet)
+                and citation.snippet.strip() in line.redacted_text
+            ):
                 citation.citation_valid = True
                 has_valid_citation = True
             else:

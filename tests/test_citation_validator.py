@@ -1,6 +1,8 @@
-"""Tests for citation validation (LT-18)."""
+"""Tests for citation validation (LT-18, LT-44)."""
 
-from logtldr.citation_validator import validate_citations
+import pytest
+
+from logtldr.citation_validator import MIN_SNIPPET_CHARS, validate_citations
 from logtldr.models import Citation, Hypothesis, LLMResponse, LogLine
 
 
@@ -73,3 +75,77 @@ def test_drop_invalid_promote_next() -> None:
     assert len(result.hypotheses) == 1
     # The first one is dropped, so the second one becomes the top (index 0)
     assert result.hypotheses[0].cause == "Right"
+
+# ── LT-44: trivial snippets must not count as evidence ──────────────
+
+
+@pytest.mark.parametrize("snippet", ["", " ", "   ", "e", "ERROR", "  ERROR  ", "disk"])
+def test_trivial_snippet_is_invalid(snippet: str) -> None:
+    """Empty, whitespace or tiny snippets match almost any line, so reject them."""
+    lines = [_make_line(1, "ERROR payment service timed out")]
+    citation = Citation(line_id=1, snippet=snippet)
+    hyp = Hypothesis(cause="Aliens", evidence_type="direct", confidence="high", citations=[citation])
+    response = LLMResponse(status="ok", hypotheses=[hyp])
+
+    result = validate_citations(response, lines)
+
+    assert citation.citation_valid is False
+    assert result.status == "not_enough_signal"
+    assert result.hypotheses is None
+
+
+@pytest.mark.parametrize("snippet", ["OOMKilled", "disk full", "ERROR boom"])
+def test_short_real_snippet_is_valid(snippet: str) -> None:
+    """Short but real evidence at or above the minimum must still pass."""
+    lines = [_make_line(1, f"FATAL {snippet} at node-3")]
+    citation = Citation(line_id=1, snippet=snippet)
+    hyp = Hypothesis(cause="Real", evidence_type="direct", confidence="high", citations=[citation])
+
+    result = validate_citations(LLMResponse(status="ok", hypotheses=[hyp]), lines)
+
+    assert citation.citation_valid is True
+    assert result.status == "ok"
+
+
+def test_snippet_surrounding_whitespace_is_ignored() -> None:
+    """The LLM may pad a snippet with spaces; the stripped text is what matters."""
+    lines = [_make_line(1, "ERROR disk full on /var")]
+    citation = Citation(line_id=1, snippet="  disk full  ")
+    hyp = Hypothesis(cause="Disk", evidence_type="direct", confidence="high", citations=[citation])
+
+    result = validate_citations(LLMResponse(status="ok", hypotheses=[hyp]), lines)
+
+    assert citation.citation_valid is True
+    assert result.status == "ok"
+
+
+def test_trivial_citation_does_not_rescue_hypothesis() -> None:
+    """A hypothesis whose only citations are trivial is dropped; a valid one survives."""
+    lines = [_make_line(1, "ERROR disk full on /var")]
+    fake = Hypothesis(
+        cause="Aliens", evidence_type="direct", confidence="high",
+        citations=[Citation(line_id=1, snippet=""), Citation(line_id=1, snippet="e")],
+    )
+    real = Hypothesis(
+        cause="Disk", evidence_type="direct", confidence="high",
+        citations=[Citation(line_id=1, snippet="disk full")],
+    )
+
+    result = validate_citations(LLMResponse(status="ok", hypotheses=[fake, real]), lines)
+
+    assert result.status == "ok"
+    assert [h.cause for h in result.hypotheses] == ["Disk"]
+
+
+def test_min_snippet_boundary() -> None:
+    """Exactly MIN_SNIPPET_CHARS passes; one fewer fails."""
+    text = "abcdefghijklmnop"
+    lines = [_make_line(1, text)]
+    ok = Citation(line_id=1, snippet=text[:MIN_SNIPPET_CHARS])
+    short = Citation(line_id=1, snippet=text[: MIN_SNIPPET_CHARS - 1])
+    hyp = Hypothesis(cause="B", evidence_type="direct", confidence="high", citations=[ok, short])
+
+    validate_citations(LLMResponse(status="ok", hypotheses=[hyp]), lines)
+
+    assert ok.citation_valid is True
+    assert short.citation_valid is False
