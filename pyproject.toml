@@ -84,5 +84,5 @@ markers = [
 
 
 [[tool.mypy.overrides]]
-module = ["drain3.*", "litellm.*", "tiktoken.*"]
+module = ["drain3.*", "litellm.*", "tiktoken.*", "langfuse.*"]
 ignore_missing_imports = true
