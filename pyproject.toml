@@ -30,10 +30,12 @@ dependencies = [
     "httpx",
     "litellm",
     "pydantic",
-    "langfuse",
 ]
 
 [project.optional-dependencies]
+tracing = [
+    "langfuse",
+]
 dev = [
     "pytest",
     "ruff",
@@ -41,6 +43,7 @@ dev = [
     "types-PyYAML",
     "pytest-socket",
 ]
+
 
 [project.urls]
 Homepage = "https://github.com/MAJDADDIN/logtldr"
@@ -81,5 +84,5 @@ markers = [
 
 
 [[tool.mypy.overrides]]
-module = ["drain3.*", "litellm.*", "tiktoken.*"]
+module = ["drain3.*", "litellm.*", "tiktoken.*", "langfuse.*"]
 ignore_missing_imports = true

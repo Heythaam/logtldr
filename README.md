@@ -117,6 +117,16 @@ Provider prefixes: `ollama/`, `groq/`, `gemini/`, `openrouter/`, `anthropic/`.
 
 **Works fully offline.** The tokenizer used to fit logs into the model's context ships with the install (via `litellm`), so logtldr never downloads anything at runtime. If it can't be loaded for any reason, logtldr falls back to approximate token counts and says so on stderr. This is tested in CI with all network sockets blocked.
 
+
+**Tracing is off unless you turn it on.** For debugging cloud runs, logtldr can send
+traces to [Langfuse](https://langfuse.com). It only does so when you opt in, never in
+local mode, and it tells you on stderr when it's on:
+
+    pip install "logtldr[tracing]"
+    export LOGTLDR_TRACING=1     # plus your usual LANGFUSE_* keys
+
+Traces contain the redacted prompt and the model's response, never your original log lines.
+
 To use a cloud model, you must explicitly confirm:
 
 ```bash
