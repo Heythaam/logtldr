@@ -16,6 +16,8 @@ kubectl logs my-pod --since=1h | logtldr
 pip install logtldr
 ```
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch and release process.
+
 Requires Python 3.11+. For local-only mode (the default), install [Ollama](https://ollama.com) and pull a model:
 
 ```bash
